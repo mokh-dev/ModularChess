@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-
+[CreateAssetMenu(menuName = "Scriptable Objects/Movement Patterns/Pawn Movement")]
 public class PawnMovementPattern : MovementPattern
 {
-    public override List<Vector2> FindPossibleMoves(int boardSize, Vector2 currentPos, int team)
+    public override List<Vector2> FindPossibleMoves(GameObject[] boardPieces, Vector2 currentPos, int team)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
