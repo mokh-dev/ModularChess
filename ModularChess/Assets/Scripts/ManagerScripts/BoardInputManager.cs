@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
+public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
 
     private static BoardInputManager _instance;
@@ -10,6 +10,11 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     public static BoardInputManager Instance { get { return _instance; } }
 
     private GameObject _selectedPiece;
+    private Vector2 oldMouseDownPos = new Vector2(-1,-1); //means not in use
+
+    private Vector2 mouseDownPos;
+    private Vector2 mouseUpPos;
+    private int intMouseDownPos;
 
 
     private void Awake()
@@ -24,59 +29,57 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Vector2 mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
-        int intMouseDownPos = BoardHelper.ConvertVector2PosToIntPos(mouseDownPos);
+
+        mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
+        intMouseDownPos = BoardHelper.ConvertVector2PosToIntPos(mouseDownPos);
 
         if (BoardStateManager.Instance.BoardGameObjects[intMouseDownPos] != null)
         {
-            Debug.Log("clicked piece");
             _selectedPiece = BoardStateManager.Instance.BoardGameObjects[intMouseDownPos];
             _selectedPiece.GetComponent<PieceController>().SpawnPossibleMoveMarkers();
             
-        }
-        else
-        {
-            Debug.Log("Empty");
-            _selectedPiece = null;
         }
     }
         
     public void OnPointerUp(PointerEventData eventData)
     {
-        // Debug.Log("Pointer Up");
         if (_selectedPiece != null)
         {
-            Vector2 mouseUpPos = new Vector2(Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.y));
+            mouseUpPos = new Vector2(Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.y));
 
             List<Vector2> possibleMoves = _selectedPiece.GetComponent<PieceController>().FindCurrentPossibleMoves();
 
             if (possibleMoves.Contains(mouseUpPos))
             {
-                Debug.Log("make move");
+                if (oldMouseDownPos != new Vector2(-1,-1))
+                {
+                    BoardStateManager.Instance.MovePiece(oldMouseDownPos, mouseUpPos);
+                    oldMouseDownPos = new Vector2(-1,-1);        
+                }
+                else
+                {
+                    BoardStateManager.Instance.MovePiece(mouseDownPos, mouseUpPos);
+                }
+
+                BoardStateManager.Instance.ClearPossibleMoveMarkers();
             }
             else
             {
-                Debug.Log("Invalid Move");
+                if (mouseUpPos != mouseDownPos)
+                {
+                    BoardStateManager.Instance.ClearPossibleMoveMarkers();
+                }
+                else
+                {
+                    oldMouseDownPos = mouseDownPos;
+                }
             }
         }
         
-
+        if (BoardStateManager.Instance.BoardGameObjects[intMouseDownPos] == null)
+        {
+            BoardStateManager.Instance.ClearPossibleMoveMarkers();
+        }
         
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        Vector2 mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
-        Vector2 mouseUpPos = new Vector2(Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.y));
-
-        // if (mouseDownPos == mouseUpPos)
-        // {
-        //     Debug.Log("Click");
-        // }
-        // else
-        // {
-        //     Debug.Log("Drag");
-        // }
-
     }
 }

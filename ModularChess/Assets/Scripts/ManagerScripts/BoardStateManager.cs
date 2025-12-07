@@ -55,7 +55,22 @@ public class BoardStateManager : MonoBehaviour
         BoardGameObjects[BoardHelper.ConvertVector2PosToIntPos(pos)] = newPiece;
     }
 
+    public void MovePiece(Vector2 initialPos, Vector2 endPos)
+    {
+        int initialIntPos = BoardHelper.ConvertVector2PosToIntPos(initialPos);
+        int endIntPos = BoardHelper.ConvertVector2PosToIntPos(endPos);
 
+        GameObject pieceToMove = BoardGameObjects[initialIntPos];
+
+        if (pieceToMove != null)
+        {
+            BoardGameObjects[initialIntPos] = null;
+
+            pieceToMove.transform.position = endPos;
+
+            BoardGameObjects[endIntPos] = pieceToMove;
+        }
+    }
 
 
     public void ClearPossibleMoveMarkers()
