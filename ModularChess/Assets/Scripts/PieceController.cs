@@ -9,6 +9,10 @@ public class PieceController : MonoBehaviour
 
     private SpriteRenderer sr;
 
+    private Vector2 _boardPos;
+
+    private List<Vector2> _possibleMoves;
+
 
     public void LoadPieceData(PieceScriptableObject loadPieceData, int loadTeam)
     {
@@ -30,25 +34,30 @@ public class PieceController : MonoBehaviour
     }
 
 
-
+    public List<Vector2> FindCurrentPossibleMoves()
+    {
+        return pieceData.PieceMovementPattern.FindPossibleMoves(BoardStateManager.Instance.BoardGameObjects, new Vector2(transform.position.x, transform.position.y), team);
+    }
 
     void Start()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
-
-
-        List<Vector2> possibleMoves = pieceData.PieceMovementPattern.FindPossibleMoves(BoardStateManager.Instance.BoardGameObjects, new Vector2(transform.position.x, transform.position.y), team);
-        foreach (var move in possibleMoves)
-        {
-            Debug.Log(move);
-        }
-
-        BoardStateManager.Instance.SpawnPossibleMoveMarkers(possibleMoves);
     }
 
-    void Update()
+
+    public void SpawnPossibleMoveMarkers()
     {
-        
-        
+        BoardStateManager.Instance.ClearPossibleMoveMarkers();
+
+        _possibleMoves = FindCurrentPossibleMoves();
+        foreach (var possibleMove in _possibleMoves)
+        {
+            GameObject newMarker = Instantiate(BoardDataManager.Instance.possibleMoveMarkerPre, possibleMove, Quaternion.identity);
+            BoardStateManager.Instance.PossibleMoveMarkers.Add(newMarker);
+        }
     }
+
+    
+
+
 }

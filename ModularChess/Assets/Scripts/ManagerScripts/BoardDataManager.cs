@@ -29,4 +29,14 @@ public class BoardDataManager : MonoBehaviour
             _instance = this;
         }
     }
+
+    void OnEnable()
+    {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+        } else {
+            _instance = this;
+        }
+    }
 }

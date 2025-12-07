@@ -10,6 +10,7 @@ public class BoardStateManager : MonoBehaviour
     public static BoardStateManager Instance { get { return _instance; } }
 
     [field: SerializeField] public GameObject[] BoardGameObjects { get; private set;} = new GameObject[63];
+    public GameState gameState; 
 
 
 
@@ -21,7 +22,7 @@ public class BoardStateManager : MonoBehaviour
     [SerializeField] private int testpieceTeam;
 
 
-    private List<GameObject> _possibleMoveMarkers = new List<GameObject>();
+    public List<GameObject> PossibleMoveMarkers = new List<GameObject>();
 
 
 
@@ -33,6 +34,8 @@ public class BoardStateManager : MonoBehaviour
         } else {
             _instance = this;
         }
+
+        // gameState = GameState.Team1MoveTurn; 
     }
 
 
@@ -53,26 +56,25 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-    public void SpawnPossibleMoveMarkers(List<Vector2> possibleMovesToMark)
-    {
-        ClearPossibleMoveMarkers();
 
-        foreach (var possibleMove in possibleMovesToMark)
-        {
-            GameObject newMarker = Instantiate(BoardDataManager.Instance.possibleMoveMarkerPre, possibleMove, Quaternion.identity);
-            _possibleMoveMarkers.Add(newMarker);
-        }
-    }
 
-    private void ClearPossibleMoveMarkers()
+    public void ClearPossibleMoveMarkers()
     {
-        foreach (var possibleMoveMarker in _possibleMoveMarkers)
+        foreach (var possibleMoveMarker in PossibleMoveMarkers)
         {
             Destroy(possibleMoveMarker);
         }
 
-        _possibleMoveMarkers.Clear();
+        PossibleMoveMarkers.Clear();
     }
 
 
+    public enum GameState
+    {
+        Team1MoveTurn,
+        Team1CardTurn,
+
+        Team2MoveTurn,
+        Team2CardTurn
+    }
 }
