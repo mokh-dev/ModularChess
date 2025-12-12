@@ -9,7 +9,7 @@ public class BoardStateManager : MonoBehaviour
 
     public static BoardStateManager Instance { get { return _instance; } }
 
-    [field: SerializeField] public GameObject[] BoardGameObjects { get; private set;} = new GameObject[63];
+    public Dictionary<Vector2, GameObject> BoardGameObjects { get; private set;} = new Dictionary<Vector2, GameObject>();
     public GameState gameState; 
 
 
@@ -17,7 +17,7 @@ public class BoardStateManager : MonoBehaviour
 
 
     [Header("---Test---")]
-    [SerializeField] private PieceScriptableObject testpieceSO;
+    [SerializeField] private GameObject testPiecePre;
     [SerializeField] private Vector2 testPiecePos;
     [SerializeField] private int testpieceTeam;
 
@@ -41,35 +41,27 @@ public class BoardStateManager : MonoBehaviour
 
     public void AddTestPiece()
     {
-        AddNewPiece(testPiecePos, testpieceTeam, testpieceSO);
+        AddNewPiece(testPiecePre, testPiecePos, testpieceTeam);
     }
 
 
-    public void AddNewPiece(Vector2 pos, int team, PieceScriptableObject pieceData)
+    public void AddNewPiece(GameObject piecePre, Vector2 pos, int team)
     {
-        GameObject newPiece = Instantiate(BoardDataManager.Instance.basePiecePre, pos, Quaternion.identity);
+        GameObject newPiece = Instantiate(piecePre, pos, Quaternion.identity);
+        newPiece.GetComponent<PieceController>().Team = team;
 
-        newPiece.GetComponent<PieceController>().LoadPieceData(pieceData, team);
-
-
-        BoardGameObjects[BoardHelper.ConvertVector2PosToIntPos(pos)] = newPiece;
+        BoardGameObjects.Add(pos, newPiece);
     }
 
     public void MovePiece(Vector2 initialPos, Vector2 endPos)
     {
-        int initialIntPos = BoardHelper.ConvertVector2PosToIntPos(initialPos);
-        int endIntPos = BoardHelper.ConvertVector2PosToIntPos(endPos);
+        GameObject selectedPiece = BoardGameObjects[initialPos];
 
-        GameObject pieceToMove = BoardGameObjects[initialIntPos];
+        selectedPiece.transform.position = endPos;
 
-        if (pieceToMove != null)
-        {
-            BoardGameObjects[initialIntPos] = null;
+        BoardGameObjects.Remove(initialPos);
+        BoardGameObjects.Add(endPos, selectedPiece);
 
-            pieceToMove.transform.position = endPos;
-
-            BoardGameObjects[endIntPos] = pieceToMove;
-        }
     }
 
 
@@ -81,6 +73,18 @@ public class BoardStateManager : MonoBehaviour
         }
 
         PossibleMoveMarkers.Clear();
+    }
+
+    public void PrintDictionary()
+    {
+        string output = "";
+
+        foreach (KeyValuePair<Vector2, GameObject> item in BoardGameObjects)
+        {
+            output+= ", {" + item.Key.ToString() + ": " + item.Value.name.ToString() + "}";
+        }
+
+        Debug.Log("Dictionary = [" + output + "]");
     }
 
 

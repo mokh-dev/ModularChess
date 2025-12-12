@@ -2,14 +2,17 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Scriptable Objects/Movement Patterns/Pawn Movement")]
-public class PawnMovementPattern : MovementPattern
+
+public class PawnMovementPattern : MonoBehaviour, IMovementPattern
 {
-    public override List<Vector2> FindPossibleMoves(GameObject[] boardPieces, Vector2 currentPos, int team)
+    public List<Vector2> FindPossibleMoves(Dictionary<Vector2, GameObject> boardGameObjects, GameObject currentPiece)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
-        Vector2 oneStep = new Vector2(currentPos.x, currentPos.y+1);
+        Vector2 oneStep = new Vector2(currentPiece.transform.position.x, currentPiece.transform.position.y+1);
+
+        
+
         possibleMoves.Add(oneStep);
 
         // BoardStateManager.Instance

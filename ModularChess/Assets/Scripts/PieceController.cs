@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PieceController : MonoBehaviour
 {
 
-    [SerializeField] private int team;
-    [SerializeField] private PieceScriptableObject pieceData;
+    public int Team;
 
     private SpriteRenderer sr;
 
@@ -13,51 +13,35 @@ public class PieceController : MonoBehaviour
 
     private List<Vector2> _possibleMoves;
 
+    private IMovementPattern movementPattern;
 
-    public void LoadPieceData(PieceScriptableObject loadPieceData, int loadTeam)
-    {
-        pieceData = loadPieceData;
-        team = loadTeam;
-
-        UpdatePieceData();
-    }
-
-    private void UpdatePieceData()
-    {
-        gameObject.name = pieceData.PieceName;
-
-        sr = gameObject.GetComponent<SpriteRenderer>();
-        sr.sprite = pieceData.PieceSprite;
-
-        BoardStateManager boardStateManager = GameObject.FindAnyObjectByType<BoardStateManager>();
-        sr.color = (team == 1) ? BoardDataManager.Instance.LightPieceTeamColor : BoardDataManager.Instance.DarkPieceTeamColor;
-    }
-
-
-    public List<Vector2> FindCurrentPossibleMoves()
-    {
-        return pieceData.PieceMovementPattern.FindPossibleMoves(BoardStateManager.Instance.BoardGameObjects, new Vector2(transform.position.x, transform.position.y), team);
-    }
 
     void Start()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
+        movementPattern = gameObject.GetComponent<IMovementPattern>();
+    }
+
+    public List<Vector2> FindCurrentPossibleMoves(Dictionary<Vector2, GameObject> boardGameObjects)
+    {
+        return movementPattern?.FindPossibleMoves(boardGameObjects, gameObject);
     }
 
 
     public void SpawnPossibleMoveMarkers()
     {
         BoardStateManager.Instance.ClearPossibleMoveMarkers();
+        _possibleMoves = FindCurrentPossibleMoves(BoardStateManager.Instance.BoardGameObjects);
 
-        _possibleMoves = FindCurrentPossibleMoves();
         foreach (var possibleMove in _possibleMoves)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.possibleMoveMarkerPre, possibleMove, Quaternion.identity);
             BoardStateManager.Instance.PossibleMoveMarkers.Add(newMarker);
         }
     }
+}
 
-    
-
-
+public interface IMovementPattern
+{
+    List<Vector2> FindPossibleMoves(Dictionary<Vector2, GameObject> boardGameObjects, GameObject currentPiece);
 }

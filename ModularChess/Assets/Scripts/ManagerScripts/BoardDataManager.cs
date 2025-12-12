@@ -13,7 +13,7 @@ public class BoardDataManager : MonoBehaviour
     [field: SerializeField] public Color LightPieceTeamColor {get; private set;}
     [field: SerializeField] public Color DarkPieceTeamColor {get; private set;}
 
-    [field: SerializeField] public int boardSize {get; private set;}
+    [field: SerializeField] public Vector2 boardShape {get; private set;}
 
     [field: SerializeField] public GameObject basePiecePre {get; private set;}
     [field: SerializeField] public GameObject possibleMoveMarkerPre {get; private set;}

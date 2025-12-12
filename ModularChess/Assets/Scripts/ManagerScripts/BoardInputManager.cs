@@ -29,13 +29,11 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     public void OnPointerDown(PointerEventData eventData)
     {
-
         mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
-        intMouseDownPos = BoardHelper.ConvertVector2PosToIntPos(mouseDownPos);
 
-        if (BoardStateManager.Instance.BoardGameObjects[intMouseDownPos] != null)
+        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
         {
-            _selectedPiece = BoardStateManager.Instance.BoardGameObjects[intMouseDownPos];
+            _selectedPiece = piece;
             _selectedPiece.GetComponent<PieceController>().SpawnPossibleMoveMarkers();
             
         }
@@ -47,13 +45,14 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         {
             mouseUpPos = new Vector2(Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.y));
 
-            List<Vector2> possibleMoves = _selectedPiece.GetComponent<PieceController>().FindCurrentPossibleMoves();
+            List<Vector2> possibleMoves = _selectedPiece.GetComponent<PieceController>().FindCurrentPossibleMoves(BoardStateManager.Instance.BoardGameObjects);
 
             if (possibleMoves.Contains(mouseUpPos))
             {
                 if (oldMouseDownPos != new Vector2(-1,-1))
                 {
-                    BoardStateManager.Instance.MovePiece(oldMouseDownPos, mouseUpPos);
+                    BoardStateManager.Instance.MovePiece(oldMouseDownPos, mouseUpPos); 
+                    // there's some bug here because old mouse down i should make a better input drag system
                     oldMouseDownPos = new Vector2(-1,-1);        
                 }
                 else
@@ -76,7 +75,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
             }
         }
         
-        if (BoardStateManager.Instance.BoardGameObjects[intMouseDownPos] == null)
+        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == false)
         {
             BoardStateManager.Instance.ClearPossibleMoveMarkers();
         }
