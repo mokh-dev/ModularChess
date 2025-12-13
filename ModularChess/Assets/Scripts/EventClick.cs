@@ -3,12 +3,6 @@ using UnityEngine.EventSystems;
 
 public class EventClick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    // private MaterialApplier materialApplier;
-    // private void Awake()
-    // {
-    //     materialApplier = GetComponent<MaterialApplier>();
-    // }
-
     public void OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("Pointer Down: " + eventData.pointerCurrentRaycast.worldPosition);

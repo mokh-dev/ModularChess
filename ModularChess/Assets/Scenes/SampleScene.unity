@@ -3686,7 +3686,8 @@ MonoBehaviour:
   <DarkPieceTeamColor>k__BackingField: {r: 0, g: 0, b: 0, a: 1}
   <boardShape>k__BackingField: {x: 0, y: 0}
   <basePiecePre>k__BackingField: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-  <possibleMoveMarkerPre>k__BackingField: {fileID: 8569823276319914242, guid: f21dd41fbfe3a8c4f8befd7d2fb15c64, type: 3}
+  <possibleMoveMarkerPre>k__BackingField: {fileID: 2203549235462881066, guid: f1ab6ed0e55186f428af7f418d7db478, type: 3}
+  <possibleAttackMarkerPre>k__BackingField: {fileID: 2380679966636271944, guid: 5eb6cfc6699e6ff4f92806dd0f3ab481, type: 3}
 --- !u!1 &1072454383
 GameObject:
   m_ObjectHideFlags: 0
@@ -4221,7 +4222,7 @@ MonoBehaviour:
   testPiecePre: {fileID: 742220669774070741, guid: a08ce5f737f34764ca319d223bd5e9ae, type: 3}
   testPiecePos: {x: 3, y: 1}
   testpieceTeam: 2
-  PossibleMoveMarkers: []
+  Markers: []
 --- !u!4 &1226270179
 Transform:
   m_ObjectHideFlags: 0

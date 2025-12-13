@@ -34,7 +34,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
         {
             _selectedPiece = piece;
-            _selectedPiece.GetComponent<PieceController>().SpawnPossibleMoveMarkers();
+            _selectedPiece.GetComponent<PieceController>().SpawnMarkers();
             
         }
     }

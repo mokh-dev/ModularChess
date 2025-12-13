@@ -17,6 +17,7 @@ public class BoardDataManager : MonoBehaviour
 
     [field: SerializeField] public GameObject basePiecePre {get; private set;}
     [field: SerializeField] public GameObject possibleMoveMarkerPre {get; private set;}
+    [field: SerializeField] public GameObject possibleAttackMarkerPre {get; private set;}
 
 
 

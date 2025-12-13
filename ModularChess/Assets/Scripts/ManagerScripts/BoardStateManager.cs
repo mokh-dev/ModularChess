@@ -22,7 +22,7 @@ public class BoardStateManager : MonoBehaviour
     [SerializeField] private int testpieceTeam;
 
 
-    public List<GameObject> PossibleMoveMarkers = new List<GameObject>();
+    public List<GameObject> Markers = new List<GameObject>();
 
 
 
@@ -67,12 +67,12 @@ public class BoardStateManager : MonoBehaviour
 
     public void ClearPossibleMoveMarkers()
     {
-        foreach (var possibleMoveMarker in PossibleMoveMarkers)
+        foreach (var possibleMoveMarker in Markers)
         {
             Destroy(possibleMoveMarker);
         }
 
-        PossibleMoveMarkers.Clear();
+        Markers.Clear();
     }
 
     public void PrintDictionary()
