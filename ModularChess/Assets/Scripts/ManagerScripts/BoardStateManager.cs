@@ -53,23 +53,32 @@ public class BoardStateManager : MonoBehaviour
         BoardGameObjects.Add(pos, newPiece);
     }
 
-    public void MovePiece(Vector2 initialPos, Vector2 endPos)
+    public void MovePiece(GameObject pieceToMove, Vector2 endPos)
     {
-        GameObject selectedPiece = BoardGameObjects[initialPos];
+        if (CheckLegalMove(pieceToMove, endPos) == false) return;
 
-        selectedPiece.transform.position = endPos;
+        BoardGameObjects.Remove(new Vector2(pieceToMove.transform.position.x, pieceToMove.transform.position.y));
 
-        BoardGameObjects.Remove(initialPos);
-        BoardGameObjects.Add(endPos, selectedPiece);
+        pieceToMove.transform.position = endPos;
 
+        BoardGameObjects.Add(endPos, pieceToMove);
+    }
+
+    public bool CheckLegalMove(GameObject piece, Vector2 endPos)
+    {
+        List<Vector2> possibleMoves = piece.GetComponent<PieceController>().FindCurrentPossibleMoves(BoardGameObjects);
+
+        if (possibleMoves.Contains(endPos)) return true;
+
+        return false;
     }
 
 
-    public void ClearPossibleMoveMarkers()
+    public void ClearAllMarkers()
     {
-        foreach (var possibleMoveMarker in Markers)
+        foreach (var marker in Markers)
         {
-            Destroy(possibleMoveMarker);
+            Destroy(marker);
         }
 
         Markers.Clear();

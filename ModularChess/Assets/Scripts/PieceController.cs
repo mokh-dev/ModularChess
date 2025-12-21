@@ -36,7 +36,7 @@ public class PieceController : MonoBehaviour
 
     public void SpawnMarkers()
     {
-        BoardStateManager.Instance.ClearPossibleMoveMarkers();
+        BoardStateManager.Instance.ClearAllMarkers();
 
         List<Vector2> possibleMoves = FindCurrentPossibleMoves(BoardStateManager.Instance.BoardGameObjects);
         List<Vector2> possibleAttacks = FindCurrentPossibleAttacks(BoardStateManager.Instance.BoardGameObjects);
@@ -48,7 +48,7 @@ public class PieceController : MonoBehaviour
 
     public void SpawnPossibleAttackMarkers()
     {
-        BoardStateManager.Instance.ClearPossibleMoveMarkers();
+        BoardStateManager.Instance.ClearAllMarkers();
         List<Vector2> possibleAttacks = FindCurrentPossibleAttacks(BoardStateManager.Instance.BoardGameObjects);
         attackPattern?.SpawnAttackMarkers(possibleAttacks);
     }
