@@ -5,39 +5,39 @@ public class BoardDataManager : MonoBehaviour
 {
 
 
-    private static BoardDataManager _instance;
+    private static BoardDataManager instance;
 
-    public static BoardDataManager Instance { get { return _instance; } }
+    public static BoardDataManager Instance { get { return instance; } }
 
     
-    [field: SerializeField] public Color LightPieceTeamColor {get; private set;}
-    [field: SerializeField] public Color DarkPieceTeamColor {get; private set;}
+    [field: SerializeField] public Color WhitePieceTeamColor {get; private set;}
+    [field: SerializeField] public Color BlackPieceTeamColor {get; private set;}
 
-    [field: SerializeField] public Vector2 boardShape {get; private set;}
+    [field: SerializeField] public Vector2 BoardShape {get; private set;}
 
-    [field: SerializeField] public GameObject basePiecePre {get; private set;}
-    [field: SerializeField] public GameObject possibleMoveMarkerPre {get; private set;}
-    [field: SerializeField] public GameObject possibleAttackMarkerPre {get; private set;}
+    [field: SerializeField] public GameObject BasePiecePre {get; private set;}
+    [field: SerializeField] public GameObject PossibleMovementMarkerPre {get; private set;}
+    [field: SerializeField] public GameObject PossibleAttackMarkerPre {get; private set;}
 
 
 
     private void Awake()
     {
-        if (_instance != null && _instance != this)
+        if (instance != null && instance != this)
         {
             Destroy(this.gameObject);
         } else {
-            _instance = this;
+            instance = this;
         }
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        if (_instance != null && _instance != this)
+        if (instance != null && instance != this)
         {
             Destroy(this.gameObject);
         } else {
-            _instance = this;
+            instance = this;
         }
     }
 }

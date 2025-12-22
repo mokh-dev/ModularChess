@@ -5,50 +5,72 @@ using UnityEngine;
 
 public class BoardStateManager : MonoBehaviour
 {
-    private static BoardStateManager _instance;
+    private static BoardStateManager instance;
 
-    public static BoardStateManager Instance { get { return _instance; } }
+    public static BoardStateManager Instance { get { return instance; } }
+
 
     public Dictionary<Vector2, GameObject> BoardGameObjects { get; private set;} = new Dictionary<Vector2, GameObject>();
-    public GameState gameState; 
+    public Players CurrentTurn {get; private set;} 
 
 
-
+    [SerializeField] private GameObject _boardPiecesParent;
 
 
     [Header("---Test---")]
     [SerializeField] private GameObject testPiecePre;
-    [SerializeField] private Vector2 testPiecePos;
-    [SerializeField] private int testpieceTeam;
+    [SerializeField] private Vector2 _testPiecePos;
+    [SerializeField] private Players _testPieceTeam;
 
 
     public List<GameObject> Markers = new List<GameObject>();
 
 
-
     private void Awake()
     {
-        if (_instance != null && _instance != this)
+        if (instance != null && instance != this)
         {
             Destroy(this.gameObject);
         } else {
-            _instance = this;
+            instance = this;
         }
 
-        // gameState = GameState.Team1MoveTurn; 
+        LoadBoardToDict(); 
+
+        StartGame();
     }
 
+    private void LoadBoardToDict()
+    {
+        foreach (var gameObjectTransform in _boardPiecesParent.GetComponentsInChildren<Transform>())
+        {
+            BoardGameObjects.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject);
+        }
+    }
+
+    private void StartGame()
+    {
+        CurrentTurn = Players.White;
+    }
+    
+    public void EndPlayerTurn()
+    {
+        CurrentTurn = (CurrentTurn == Players.White) ? Players.Black : Players.White;
+    }
 
     public void AddTestPiece()
     {
-        AddNewPiece(testPiecePre, testPiecePos, testpieceTeam);
+        AddNewPiece(testPiecePre, _testPiecePos, _testPieceTeam);
     }
 
 
-    public void AddNewPiece(GameObject piecePre, Vector2 pos, int team)
+    public void AddNewPiece(GameObject piecePre, Vector2 pos, Players team)
     {
         GameObject newPiece = Instantiate(piecePre, pos, Quaternion.identity);
-        newPiece.GetComponent<PieceController>().Team = team;
+        newPiece.transform.SetParent(_boardPiecesParent.transform);
+
+        newPiece.GetComponent<BasePieceController>().PieceTeam = team;
+        newPiece.GetComponent<BasePieceController>().UpdateTeamColor();
 
         BoardGameObjects.Add(pos, newPiece);
     }
@@ -57,7 +79,7 @@ public class BoardStateManager : MonoBehaviour
     {
         if (CheckLegalMove(pieceToMove, endPos) == false) return;
 
-        BoardGameObjects.Remove(new Vector2(pieceToMove.transform.position.x, pieceToMove.transform.position.y));
+        BoardGameObjects.Remove((Vector2)pieceToMove.transform.position);
 
         pieceToMove.transform.position = endPos;
 
@@ -66,9 +88,31 @@ public class BoardStateManager : MonoBehaviour
 
     public bool CheckLegalMove(GameObject piece, Vector2 endPos)
     {
-        List<Vector2> possibleMoves = piece.GetComponent<PieceController>().FindCurrentPossibleMoves(BoardGameObjects);
+        if (CheckLegalMovement(piece, endPos) == true) return true;
+        if (CheckLegalAttack(piece, endPos) == true) return true;
 
-        if (possibleMoves.Contains(endPos)) return true;
+        return false;
+    }
+
+
+    private bool CheckLegalMovement(GameObject piece, Vector2 endPos)
+    {
+        BasePieceController currentPieceController = piece.GetComponent<BasePieceController>();
+
+        List<Vector2> possibleMovements = currentPieceController.FindCurrentPossibleMovements();
+
+        if (possibleMovements.Contains(endPos)) return true;
+
+        return false;
+    }
+
+    private bool CheckLegalAttack(GameObject piece, Vector2 endPos)
+    {
+        BasePieceController currentPieceController = piece.GetComponent<BasePieceController>();
+
+        List<Vector2> possibleAttacks = currentPieceController.FindCurrentPossibleAttacks();
+
+        if (possibleAttacks.Contains(endPos)) return true;
 
         return false;
     }
@@ -95,14 +139,10 @@ public class BoardStateManager : MonoBehaviour
 
         Debug.Log("Dictionary = [" + output + "]");
     }
+}
 
-
-    public enum GameState
-    {
-        Team1MoveTurn,
-        Team1CardTurn,
-
-        Team2MoveTurn,
-        Team2CardTurn
-    }
+public enum Players
+{
+    White,
+    Black,
 }

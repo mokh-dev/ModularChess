@@ -9,12 +9,9 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     public static BoardInputManager Instance { get { return _instance; } }
 
-    [SerializeField ]private GameObject _selectedPiece;
-    private Vector2 oldMouseDownPos = new Vector2(-1,-1); //means not in use
-
+    [SerializeField] private GameObject _selectedPiece;
     private Vector2 mouseDownPos;
     private Vector2 mouseUpPos;
-    private int intMouseDownPos;
 
 
     private void Awake()
@@ -29,8 +26,10 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private void SelectPiece(GameObject pieceToSelect)
     {
+        if (IsCorrectTeam(pieceToSelect) == false) return;
+
         _selectedPiece = pieceToSelect;
-        _selectedPiece.GetComponent<PieceController>().SpawnMarkers();
+        _selectedPiece.GetComponent<BasePieceController>().SpawnMarkers();
     }
 
     private void UnselectPiece()
@@ -42,7 +41,15 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     private void PlayMove(Vector2 endPos)
     {
         BoardStateManager.Instance.MovePiece(_selectedPiece, endPos);
+        BoardStateManager.Instance.EndPlayerTurn();
+
         UnselectPiece();
+    }
+
+    private bool IsCorrectTeam(GameObject piece)
+    {
+        if (BoardStateManager.Instance.CurrentTurn == piece.GetComponent<BasePieceController>().PieceTeam) return true;
+        return false;
     }
 
 
@@ -83,48 +90,6 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         }
 
         PlayMove(mouseUpPos);
-
-        //
-
-
-        // if (_selectedPiece != null)
-        // {
-        //     mouseUpPos = new Vector2(Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerCurrentRaycast.worldPosition.y));
-
-        //     List<Vector2> possibleMoves = _selectedPiece.GetComponent<PieceController>().FindCurrentPossibleMoves(BoardStateManager.Instance.BoardGameObjects);
-
-        //     if (possibleMoves.Contains(mouseUpPos))
-        //     {
-        //         if (oldMouseDownPos != new Vector2(-1,-1))
-        //         {
-        //             BoardStateManager.Instance.MovePiece(oldMouseDownPos, mouseUpPos); 
-        //             // there's some bug here because old mouse down i should make a better input drag system
-        //             oldMouseDownPos = new Vector2(-1,-1);        
-        //         }
-        //         else
-        //         {
-        //             BoardStateManager.Instance.MovePiece(mouseDownPos, mouseUpPos);
-        //         }
-
-        //         BoardStateManager.Instance.ClearPossibleMoveMarkers();
-        //     }
-        //     else
-        //     {
-        //         if (mouseUpPos != mouseDownPos)
-        //         {
-        //             BoardStateManager.Instance.ClearPossibleMoveMarkers();
-        //         }
-        //         else
-        //         {
-        //             oldMouseDownPos = mouseDownPos;
-        //         }
-        //     }
-        // }
-        
-        // if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == false)
-        // {
-        //     BoardStateManager.Instance.ClearPossibleMoveMarkers();
-        // }
         
     }
 }
