@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -44,6 +43,7 @@ public class BoardStateManager : MonoBehaviour
     {
         foreach (var gameObjectTransform in _boardPiecesParent.GetComponentsInChildren<Transform>())
         {
+            if (gameObjectTransform == _boardPiecesParent.transform) continue;
             BoardGameObjects.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject);
         }
     }
@@ -70,21 +70,36 @@ public class BoardStateManager : MonoBehaviour
         newPiece.transform.SetParent(_boardPiecesParent.transform);
 
         newPiece.GetComponent<BasePieceController>().PieceTeam = team;
-        newPiece.GetComponent<BasePieceController>().UpdateTeamColor();
+        newPiece.GetComponent<BasePieceController>().RefreshTeam();
 
         BoardGameObjects.Add(pos, newPiece);
     }
 
+    public void AttackPieceAtPos(Vector2 pos)
+    {
+        Destroy(BoardGameObjects[pos]);
+        BoardGameObjects.Remove(pos);
+    }
+
     public void MovePiece(GameObject pieceToMove, Vector2 endPos)
     {
-        if (CheckLegalMove(pieceToMove, endPos) == false) return;
+        if (CheckLegalAttack(pieceToMove, endPos) == true) 
+        {
+            AttackPieceAtPos(endPos);
+        }
+        else
+        {
+            if (CheckLegalMovement(pieceToMove, endPos) == false) return;
+        }
+
 
         BoardGameObjects.Remove((Vector2)pieceToMove.transform.position);
 
         pieceToMove.transform.position = endPos;
-
         BoardGameObjects.Add(endPos, pieceToMove);
     }
+
+     
 
     public bool CheckLegalMove(GameObject piece, Vector2 endPos)
     {

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class BasePieceController : MonoBehaviour
@@ -22,7 +21,7 @@ public class BasePieceController : MonoBehaviour
     void Awake()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
-        UpdateTeamColor();
+        RefreshTeam();
 
         movementPattern = gameObject.GetComponent<IMovement>();
         attackPattern = gameObject.GetComponent<IAttack>();
@@ -30,10 +29,13 @@ public class BasePieceController : MonoBehaviour
         moveDir = (PieceTeam == Players.White) ? 1 : -1;
     }
 
-    public void UpdateTeamColor()
+    public void RefreshTeam()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
         sr.color = (PieceTeam == Players.White) ? BoardDataManager.Instance.WhitePieceTeamColor : BoardDataManager.Instance.BlackPieceTeamColor;
+    
+        Vector2 position = (Vector2)transform.position;
+        gameObject.name = PieceTeam.ToString() + " Piece at: (" + ((int)position.x).ToString() + "," + ((int)position.y).ToString() + ")";
     }
 
 

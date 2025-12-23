@@ -59,8 +59,11 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
         {
-            SelectPiece(piece);
-            return;
+            if (IsCorrectTeam(piece) == true)
+            {
+                SelectPiece(piece);
+                return;
+            }
         }
 
 

@@ -9,14 +9,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -59,38 +51,14 @@ PrefabInstance:
     - target: {fileID: 5378284155373566842, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: -8532004215358912450, guid: 278c82450ee41b943b6f5dfefdd1a3b1, type: 3}
+      objectReference: {fileID: 5782662973348025750, guid: 7f314abf58fe80649bd9a04538a49334, type: 3}
     - target: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_Name
-      value: Pawn
+      value: Rook
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3968301726089373453, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9151963995764015532}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
---- !u!1 &742220669774070741 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-  m_PrefabInstance: {fileID: 7806628414121505232}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &9151963995764015532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 742220669774070741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fbaeab224f9496409a5fc2fcdb6338c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PawnMovementPattern
-  PieceTeam: 0
-  MovementStep: 1
-  HomeRowStep: 2
-  _homeRow: 1
