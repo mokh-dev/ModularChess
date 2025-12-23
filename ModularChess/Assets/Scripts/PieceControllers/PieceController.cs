@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class BasePieceController : MonoBehaviour
+public class PieceController : MonoBehaviour
 {
 
     public Players PieceTeam;
 
 
-    protected SpriteRenderer sr;
-    protected int moveDir;
-    protected Vector2 boardShape = new Vector2(7,7);
+    public SpriteRenderer sr {get; private set;}
+    public int moveDir {get; private set;}
+    public Vector2 boardShape {get; private set;} = new Vector2(7,7);
 
 
-    private IMovement movementPattern;
-    private IAttack attackPattern;
+    public IMovement movementPattern {get; private set;}
+    public IAttack attackPattern {get; private set;}
 
     
 
@@ -68,7 +69,9 @@ public class BasePieceController : MonoBehaviour
         }
     }
 
-    protected Vector2 DirectionalizeVector2(Vector2 vector)
+
+
+    public Vector2 DirectionalizeVector2(Vector2 vector)
     {
         return new Vector2(
             Math.Sign(vector.x),
@@ -76,7 +79,7 @@ public class BasePieceController : MonoBehaviour
         );
     }
 
-    protected bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
+    public bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
     {
         Vector2 direction = DirectionalizeVector2(endPos - currentPos);
         Vector2 iteratedPos = currentPos + direction;
@@ -91,7 +94,7 @@ public class BasePieceController : MonoBehaviour
     }
 
 
-   protected bool IsInBounds(Vector2 currentPos)
+   public bool IsInBounds(Vector2 currentPos)
     {
         if (currentPos.x > boardShape.x) return false;
         if (currentPos.x < 0) return false;
@@ -101,7 +104,7 @@ public class BasePieceController : MonoBehaviour
 
         return true;
     }
-    protected bool IsEmptyAtPos(Vector2 endPos)
+    public bool IsEmptyAtPos(Vector2 endPos)
     {  
         if (IsInBounds(endPos) == false) return false;
         if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(endPos, out GameObject obj) == true) return false;
@@ -109,13 +112,14 @@ public class BasePieceController : MonoBehaviour
         return true;
     }
 
-    protected List<Vector2> FindSlidingMovementsFromPosInDirection(Vector2 currentPos, Vector2 direction, int slideDistance = 8)
+    public List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance = 8)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
         Vector2 slidingPos = currentPos + direction;
         while (IsInBounds(slidingPos) || slideDistance <= 0)
         {
+            if (IsEmptyAtPos(slidingPos) == false) break;
             possibleMoves.Add(slidingPos);
             slidingPos += direction;
 
@@ -123,6 +127,60 @@ public class BasePieceController : MonoBehaviour
         }
 
         return possibleMoves;
+    }
+
+    public bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance = 8)
+    {
+        Vector2 attackPos;
+        Vector2 lastPosition;
+
+        List<Vector2> slidingMovements = FindSlidingMovements(currentPos, direction, slideDistance);
+
+        if (slidingMovements.Count == 0)
+        {
+            lastPosition = currentPos;
+        }
+        else
+        {
+            lastPosition = slidingMovements.LastOrDefault();
+        }
+
+
+        attackPos = lastPosition + direction;
+        
+        if (IsValidAttack(attackPos) == true)
+        {
+            validAttack = attackPos;
+            return true;  
+        } 
+
+        validAttack = default;
+        return false;
+    }
+
+    public bool IsValidAttack(Vector2 attackPos)
+    {
+        if (IsInBounds(attackPos) == false) return false;
+
+        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
+            
+        if (pieceAtAttackPos.GetComponent<PieceController>().PieceTeam == PieceTeam) return false;
+
+        return true;
+    }
+
+    public List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions)
+    {
+        List<Vector2> validAttackPositions = new List<Vector2>();
+
+        foreach (var possibleAttackPos in possibleAttackPositions)
+        {
+            if (IsValidAttack(possibleAttackPos) == false) continue;
+
+            validAttackPositions.Add(possibleAttackPos);
+        }
+
+        return validAttackPositions;
     }
 
 

@@ -29,7 +29,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         if (IsCorrectTeam(pieceToSelect) == false) return;
 
         _selectedPiece = pieceToSelect;
-        _selectedPiece.GetComponent<BasePieceController>().SpawnMarkers();
+        _selectedPiece.GetComponent<PieceController>().SpawnMarkers();
     }
 
     private void UnselectPiece()
@@ -48,7 +48,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool IsCorrectTeam(GameObject piece)
     {
-        if (BoardStateManager.Instance.CurrentTurn == piece.GetComponent<BasePieceController>().PieceTeam) return true;
+        if (BoardStateManager.Instance.CurrentTurn == piece.GetComponent<PieceController>().PieceTeam) return true;
         return false;
     }
 

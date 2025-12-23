@@ -69,8 +69,8 @@ public class BoardStateManager : MonoBehaviour
         GameObject newPiece = Instantiate(piecePre, pos, Quaternion.identity);
         newPiece.transform.SetParent(_boardPiecesParent.transform);
 
-        newPiece.GetComponent<BasePieceController>().PieceTeam = team;
-        newPiece.GetComponent<BasePieceController>().RefreshTeam();
+        newPiece.GetComponent<PieceController>().PieceTeam = team;
+        newPiece.GetComponent<PieceController>().RefreshTeam();
 
         BoardGameObjects.Add(pos, newPiece);
     }
@@ -112,7 +112,7 @@ public class BoardStateManager : MonoBehaviour
 
     private bool CheckLegalMovement(GameObject piece, Vector2 endPos)
     {
-        BasePieceController currentPieceController = piece.GetComponent<BasePieceController>();
+        PieceController currentPieceController = piece.GetComponent<PieceController>();
 
         List<Vector2> possibleMovements = currentPieceController.FindCurrentPossibleMovements();
 
@@ -123,7 +123,7 @@ public class BoardStateManager : MonoBehaviour
 
     private bool CheckLegalAttack(GameObject piece, Vector2 endPos)
     {
-        BasePieceController currentPieceController = piece.GetComponent<BasePieceController>();
+        PieceController currentPieceController = piece.GetComponent<PieceController>();
 
         List<Vector2> possibleAttacks = currentPieceController.FindCurrentPossibleAttacks();
 

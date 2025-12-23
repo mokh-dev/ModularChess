@@ -9,14 +9,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 3411439806760751306, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -64,8 +56,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pawn
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 3968301726089373453, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -90,7 +81,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fbaeab224f9496409a5fc2fcdb6338c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PawnMovementPattern
-  PieceTeam: 0
   MovementStep: 1
   HomeRowStep: 2
   _homeRow: 1
