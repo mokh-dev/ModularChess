@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using NUnit.Framework.Internal;
 using UnityEngine;
+using UnityEngine.Events;
 
 
 public class BoardStateManager : MonoBehaviour
@@ -12,6 +14,8 @@ public class BoardStateManager : MonoBehaviour
     public Dictionary<Vector2, GameObject> BoardGameObjects { get; private set;} = new Dictionary<Vector2, GameObject>();
     public Players CurrentTurn {get; private set;} 
 
+    public UnityEvent BoardUpdate;
+    public UnityEvent ResetLastMove;
 
     [SerializeField] private GameObject _boardPiecesParent;
 
@@ -81,22 +85,34 @@ public class BoardStateManager : MonoBehaviour
         BoardGameObjects.Remove(pos);
     }
 
-    public void MovePiece(GameObject pieceToMove, Vector2 endPos)
+    public void MoveBoardPiece(GameObject pieceToMove, Vector2 endPos)
     {
         if (CheckLegalAttack(pieceToMove, endPos) == true) 
         {
-            AttackPieceAtPos(endPos);
+            if (CheckForNonCaptureAttack(pieceToMove, endPos, out Vector2 attackPosition) == true)
+            {
+                AttackPieceAtPos(attackPosition);
+            }
+            else
+            {
+                AttackPieceAtPos(endPos);
+            }
         }
         else
         {
             if (CheckLegalMovement(pieceToMove, endPos) == false) return;
         }
 
+        ResetLastMove.Invoke();
 
         BoardGameObjects.Remove((Vector2)pieceToMove.transform.position);
 
-        pieceToMove.transform.position = endPos;
+        pieceToMove.GetComponent<PieceController>().MovePiece(endPos);
+
         BoardGameObjects.Add(endPos, pieceToMove);
+
+        EndPlayerTurn();
+        BoardUpdate.Invoke();
     }
 
      
@@ -130,6 +146,36 @@ public class BoardStateManager : MonoBehaviour
         if (possibleAttacks.Contains(endPos)) return true;
 
         return false;
+    }
+
+    private bool CheckForNonCaptureAttack(GameObject pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
+    {
+        attackPosition = default;
+
+        if (HandlePawnEnPasant(pieceToCheck, endPos, out Vector2 pawnAttackPosition) == true)
+        {
+            attackPosition = pawnAttackPosition;
+            return true;
+        }
+
+        return false;
+    }
+    private bool HandlePawnEnPasant(GameObject pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
+    {
+        attackPosition = default;
+
+        if (pieceToCheck.TryGetComponent(out IAttack component) == false) return false;
+        if (component is not PawnController) return false;
+
+        PawnController pawnController = pieceToCheck.GetComponent<PawnController>();
+        if (pawnController.EnPasantEnemyMovementAttackPositions.Count == 0) return false;
+        
+        if (pawnController.EnPasantEnemyMovementAttackPositions.TryGetValue(endPos, out Vector2 possibleAttackPosition) == false) return false;
+
+        attackPosition = possibleAttackPosition;
+        pawnController.ClearEnPasantDict();
+
+        return true;
     }
 
 

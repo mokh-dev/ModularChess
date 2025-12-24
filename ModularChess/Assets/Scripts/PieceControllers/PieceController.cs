@@ -11,6 +11,8 @@ public class PieceController : MonoBehaviour
 
     public SpriteRenderer sr {get; private set;}
     public int moveDir {get; private set;}
+    public Vector2 previousPiecePosition {get; private set;}
+    public bool movedLastTurn;
     public Vector2 boardShape {get; private set;} = new Vector2(7,7);
 
 
@@ -19,7 +21,7 @@ public class PieceController : MonoBehaviour
 
     
 
-    void Awake()
+    void Start()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
         RefreshTeam();
@@ -28,6 +30,22 @@ public class PieceController : MonoBehaviour
         attackPattern = gameObject.GetComponent<IAttack>();
 
         moveDir = (PieceTeam == Players.White) ? 1 : -1;
+        previousPiecePosition = (Vector2)transform.position;
+
+        BoardStateManager.Instance.ResetLastMove.AddListener(ResetLastMove);
+    }
+
+    public void ResetLastMove()
+    {
+        movedLastTurn = false;
+    }
+
+    public void MovePiece(Vector2 endPos)
+    {
+        previousPiecePosition = (Vector2)transform.position;
+        movedLastTurn = true;
+
+        transform.position = endPos;
     }
 
     public void RefreshTeam()

@@ -40,8 +40,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private void PlayMove(Vector2 endPos)
     {
-        BoardStateManager.Instance.MovePiece(_selectedPiece, endPos);
-        BoardStateManager.Instance.EndPlayerTurn();
+        BoardStateManager.Instance.MoveBoardPiece(_selectedPiece, endPos);
 
         UnselectPiece();
     }
