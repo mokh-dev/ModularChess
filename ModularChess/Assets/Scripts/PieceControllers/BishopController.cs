@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
-public class RookController : MonoBehaviour, IMovement, IAttack
+public class BishopController : MonoBehaviour, IMovement, IAttack
 {
    private PieceController pieceController;
-   public List<Vector2> Directions = new List<Vector2>{Vector2.right, Vector2.left, Vector2.up, Vector2.down};
+   public List<Vector2> Directions = new List<Vector2>{new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
    public int MovementRange;
    public int AttackRange;
 

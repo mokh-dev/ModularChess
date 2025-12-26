@@ -104,7 +104,7 @@ public class PieceController : MonoBehaviour
 
         while (iteratedPos != endPos)
         {
-            if (IsEmptyAtPos(iteratedPos) == false) return false;
+            if (IsValidMovement(iteratedPos) == false) return false;
             iteratedPos += direction;
         }
 
@@ -130,12 +130,12 @@ public class PieceController : MonoBehaviour
         return true;
     }
 
-    public List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance = 8)
+    public List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
         Vector2 slidingPos = currentPos + direction;
-        while (IsInBounds(slidingPos) || slideDistance <= 0)
+        while (IsInBounds(slidingPos) && slideDistance > 0)
         {
             if (IsEmptyAtPos(slidingPos) == false) break;
             possibleMoves.Add(slidingPos);
@@ -147,7 +147,7 @@ public class PieceController : MonoBehaviour
         return possibleMoves;
     }
 
-    public bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance = 8)
+    public bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance)
     {
         Vector2 attackPos;
         Vector2 lastPosition;
@@ -176,6 +176,32 @@ public class PieceController : MonoBehaviour
         return false;
     }
 
+    public List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
+    {
+        List<Vector2> laneMovements = new List<Vector2>();
+
+        for (int i = 0; i < directions.Count; i++)
+        {
+            laneMovements.AddRange(FindSlidingMovements(currentPos, directions[i], slideDistance));
+        }
+
+        return laneMovements;
+    }
+
+    public List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
+    {
+        List<Vector2> laneAttacks = new List<Vector2>();
+
+        for (int i = 0; i < directions.Count; i++)
+        {
+            if (TryFindSlidingAttack(out Vector2 possibleAttack, currentPos, directions[i], slideDistance) == false) continue;
+            if (IsInBounds(possibleAttack) == false) continue;
+            laneAttacks.Add(possibleAttack);
+        }
+
+        return laneAttacks;
+    }
+
     public bool IsValidAttack(Vector2 attackPos)
     {
         if (IsInBounds(attackPos) == false) return false;
@@ -199,6 +225,29 @@ public class PieceController : MonoBehaviour
         }
 
         return validAttackPositions;
+    }
+
+    public bool IsValidMovement(Vector2 possibleMovementPos)
+    {
+        if (IsInBounds(possibleMovementPos) == false) return false;
+        if (IsEmptyAtPos(possibleMovementPos) == false) return false;
+
+        return true;
+    }
+
+
+    public List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)
+    {
+        List<Vector2> validMovementPositions = new List<Vector2>();
+
+        foreach (var possibleMovementPos in possibleMovementPositions)
+        {
+            if (IsValidMovement(possibleMovementPos) == false) continue;
+
+            validMovementPositions.Add(possibleMovementPos);
+        }
+
+        return validMovementPositions;
     }
 
 

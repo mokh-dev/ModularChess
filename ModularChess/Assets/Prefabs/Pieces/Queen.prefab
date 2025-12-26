@@ -51,10 +51,10 @@ PrefabInstance:
     - target: {fileID: 5378284155373566842, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 5600290155524006502, guid: 60b312dca7ab7044a95e2216031eb925, type: 3}
+      objectReference: {fileID: 3909198007848681256, guid: 1b2d1f042905da14e8ed93fcebabeaae, type: 3}
     - target: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_Name
-      value: Rook
+      value: Queen
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -62,14 +62,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1277708165989445036}
+      addedObject: {fileID: 8361911527829344679}
   m_SourcePrefab: {fileID: 100100000, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
 --- !u!1 &742220669774070741 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
   m_PrefabInstance: {fileID: 7806628414121505232}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1277708165989445036
+--- !u!114 &8361911527829344679
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -78,13 +78,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 742220669774070741}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ade7c7322a17a444a110d5107051d08, type: 3}
+  m_Script: {fileID: 11500000, guid: fd59a47c990d0bf4d87ada2627045e60, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RookController
+  m_EditorClassIdentifier: Assembly-CSharp::QueenController
   Directions:
   - {x: 1, y: 0}
   - {x: -1, y: 0}
   - {x: 0, y: 1}
   - {x: 0, y: -1}
+  - {x: 1, y: 1}
+  - {x: -1, y: 1}
+  - {x: 1, y: -1}
+  - {x: -1, y: -1}
   MovementRange: 8
   AttackRange: 8

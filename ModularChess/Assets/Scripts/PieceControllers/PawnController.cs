@@ -20,11 +20,6 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
         _homeRow = (pieceController.PieceTeam == Players.White) ? _homeRow : (int)pieceController.boardShape.y - _homeRow;
     }
 
-    public void BoardUpdated()
-    {
-
-    }
-
     public void ClearEnPasantDict()
     {
         EnPasantEnemyMovementAttackPositions = new Dictionary<Vector2, Vector2>();
@@ -60,7 +55,7 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
 
 
         Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * pieceController.moveDir));
-        if (pieceController.IsEmptyAtPos(oneStepPos)) {possibleMoves.Add(oneStepPos);}
+        if (pieceController.IsValidMovement(oneStepPos)) {possibleMoves.Add(oneStepPos);}
 
         
         if (currentPos.y == _homeRow)
