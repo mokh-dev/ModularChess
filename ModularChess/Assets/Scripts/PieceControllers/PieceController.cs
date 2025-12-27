@@ -89,6 +89,7 @@ public class PieceController : MonoBehaviour
 
 
 
+
     public Vector2 DirectionalizeVector2(Vector2 vector)
     {
         return new Vector2(
@@ -96,21 +97,6 @@ public class PieceController : MonoBehaviour
             Math.Sign(vector.y)
         );
     }
-
-    public bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
-    {
-        Vector2 direction = DirectionalizeVector2(endPos - currentPos);
-        Vector2 iteratedPos = currentPos + direction;
-
-        while (iteratedPos != endPos)
-        {
-            if (IsValidMovement(iteratedPos) == false) return false;
-            iteratedPos += direction;
-        }
-
-        return true;
-    }
-
 
    public bool IsInBounds(Vector2 currentPos)
     {
@@ -128,6 +114,103 @@ public class PieceController : MonoBehaviour
         if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(endPos, out GameObject obj) == true) return false;
 
         return true;
+    }
+    public bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
+    {
+        Vector2 direction = DirectionalizeVector2(endPos - currentPos);
+        Vector2 iteratedPos = currentPos + direction;
+
+        while (iteratedPos != endPos)
+        {
+            if (IsValidMovement(iteratedPos) == false) return false;
+            iteratedPos += direction;
+        }
+
+        return true;
+    }
+
+
+    public bool IsValidAttack(Vector2 attackPos)
+    {
+        if (IsInBounds(attackPos) == false) return false;
+
+        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
+            
+        if (pieceAtAttackPos.GetComponent<PieceController>().PieceTeam == PieceTeam) return false;
+
+        return true;
+    }
+    public List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions)
+    {
+        List<Vector2> validAttackPositions = new List<Vector2>();
+
+        foreach (var possibleAttackPos in possibleAttackPositions)
+        {
+            if (IsValidAttack(possibleAttackPos) == false) continue;
+
+            validAttackPositions.Add(possibleAttackPos);
+        }
+
+        return validAttackPositions;
+    }
+    public bool IsValidMovement(Vector2 possibleMovementPos)
+    {
+        if (IsInBounds(possibleMovementPos) == false) return false;
+        if (IsEmptyAtPos(possibleMovementPos) == false) return false;
+
+        return true;
+    }
+    public List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)
+    {
+        List<Vector2> validMovementPositions = new List<Vector2>();
+
+        foreach (var possibleMovementPos in possibleMovementPositions)
+        {
+            if (IsValidMovement(possibleMovementPos) == false) continue;
+
+            validMovementPositions.Add(possibleMovementPos);
+        }
+
+        return validMovementPositions;
+    }
+
+
+    private int[] FindDiameterValuesOnAxis(int valueCount, int startingValue, int radius)
+    {
+        int[] values = new int[valueCount];
+
+        for (int i = 0; i < valueCount; i++)
+        {
+            values[i] = startingValue - radius + i;
+        }
+
+        return values;
+    }
+
+    public List<Vector2> FindSquarePositionsAtRange(Vector2 currentPos, int distanceToCorner)
+    {
+        if (distanceToCorner < 1) return new List<Vector2>();
+
+        List<Vector2> squarePositions = new List<Vector2>();
+
+        int diameterValueCount = 1 + 2*distanceToCorner;
+
+        int[] xDiameterValues;
+        int[] yDiameterValues;
+
+        xDiameterValues = FindDiameterValuesOnAxis(diameterValueCount, (int)currentPos.x, distanceToCorner);
+        yDiameterValues = FindDiameterValuesOnAxis(diameterValueCount, (int)currentPos.y, distanceToCorner);
+
+
+        foreach (int xValue in xDiameterValues)
+        {
+            foreach (int yValue in yDiameterValues)
+            {
+                squarePositions.Add(new Vector2(xValue, yValue));
+            }
+        }
+
+        return squarePositions;
     }
 
     public List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance)
@@ -200,54 +283,6 @@ public class PieceController : MonoBehaviour
         }
 
         return laneAttacks;
-    }
-
-    public bool IsValidAttack(Vector2 attackPos)
-    {
-        if (IsInBounds(attackPos) == false) return false;
-
-        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
-            
-        if (pieceAtAttackPos.GetComponent<PieceController>().PieceTeam == PieceTeam) return false;
-
-        return true;
-    }
-
-    public List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions)
-    {
-        List<Vector2> validAttackPositions = new List<Vector2>();
-
-        foreach (var possibleAttackPos in possibleAttackPositions)
-        {
-            if (IsValidAttack(possibleAttackPos) == false) continue;
-
-            validAttackPositions.Add(possibleAttackPos);
-        }
-
-        return validAttackPositions;
-    }
-
-    public bool IsValidMovement(Vector2 possibleMovementPos)
-    {
-        if (IsInBounds(possibleMovementPos) == false) return false;
-        if (IsEmptyAtPos(possibleMovementPos) == false) return false;
-
-        return true;
-    }
-
-
-    public List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)
-    {
-        List<Vector2> validMovementPositions = new List<Vector2>();
-
-        foreach (var possibleMovementPos in possibleMovementPositions)
-        {
-            if (IsValidMovement(possibleMovementPos) == false) continue;
-
-            validMovementPositions.Add(possibleMovementPos);
-        }
-
-        return validMovementPositions;
     }
 
 
