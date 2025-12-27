@@ -90,14 +90,6 @@ public class PieceController : MonoBehaviour
 
 
 
-    public Vector2 DirectionalizeVector2(Vector2 vector)
-    {
-        return new Vector2(
-            Math.Sign(vector.x),
-            Math.Sign(vector.y)
-        );
-    }
-
    public bool IsInBounds(Vector2 currentPos)
     {
         if (currentPos.x > boardShape.x) return false;
@@ -127,6 +119,13 @@ public class PieceController : MonoBehaviour
         }
 
         return true;
+    }
+    private Vector2 DirectionalizeVector2(Vector2 vector)
+    {
+        return new Vector2(
+            Math.Sign(vector.x),
+            Math.Sign(vector.y)
+        );
     }
 
 
@@ -173,6 +172,10 @@ public class PieceController : MonoBehaviour
 
         return validMovementPositions;
     }
+
+
+
+
 
 
     private int[] FindDiameterValuesOnAxis(int valueCount, int startingValue, int radius)

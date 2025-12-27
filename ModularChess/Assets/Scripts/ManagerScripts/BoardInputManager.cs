@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {

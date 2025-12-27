@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
@@ -62,10 +63,10 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
         {
             Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * pieceController.moveDir));
 
-            if (pieceController.IsPathEmpty((Vector2)transform.position, homeRowStepPos))
+            if (pieceController.IsPathEmpty((Vector2)transform.position, homeRowStepPos) && pieceController.IsEmptyAtPos(homeRowStepPos))
             {
                 possibleMoves.Add(homeRowStepPos);
-            }
+            }            
         }
 
         return possibleMoves;
