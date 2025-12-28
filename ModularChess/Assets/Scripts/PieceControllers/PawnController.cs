@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
@@ -8,17 +7,24 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
     public int MovementStep;
     public int HomeRowStep;
 
-    public Dictionary<Vector2, Vector2> EnPasantEnemyMovementAttackPositions{get; private set;} = new Dictionary<Vector2, Vector2>();
+    [HideInInspector] public Dictionary<Vector2, Vector2> EnPasantEnemyMovementAttackPositions{get; private set;} = new Dictionary<Vector2, Vector2>();
 
-    [SerializeField] private int _homeRow = 1;
+
+    [SerializeField] private Pieces _pieceType = Pieces.Pawn;
+    [SerializeField] private float _baseValue = 1;
+    private int _homeRow = 1;
+
 
     private PieceController pieceController;
+
 
     void Awake()
     {
         pieceController = gameObject.GetComponent<PieceController>();
+        pieceController.PieceType = _pieceType;
+        pieceController.PieceBaseValue = _baseValue;
 
-        _homeRow = (pieceController.PieceTeam == Players.White) ? _homeRow : (int)pieceController.boardShape.y - _homeRow;
+        _homeRow = (int)transform.position.y;
     }
 
     public void ClearEnPasantDict()

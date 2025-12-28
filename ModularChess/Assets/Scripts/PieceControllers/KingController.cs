@@ -4,14 +4,21 @@ using UnityEngine;
 [RequireComponent(typeof(PieceController))]
 public class KingController : MonoBehaviour, IMovement, IAttack
 {
-   private PieceController pieceController;
-   public int MovementRange;
-   public int AttackRange;
+    public int MovementRange;
+    public int AttackRange;
+
+    [SerializeField] private Pieces _pieceType = Pieces.Rook;
+    [SerializeField] private float _baseValue = Mathf.Infinity;
+
+
+    private PieceController pieceController;
 
 
     void Awake()
     {
         pieceController = gameObject.GetComponent<PieceController>();
+        pieceController.PieceType = _pieceType;
+        pieceController.PieceBaseValue = _baseValue;
     }
 
     public List<Vector2> FindMovements()

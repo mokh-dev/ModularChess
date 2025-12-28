@@ -7,13 +7,17 @@ public class PieceController : MonoBehaviour
 {
 
     public Players PieceTeam;
-
+    public Pieces PieceType;
+    public float PieceBaseValue;
+    public float PieceOverallValue;
+    public bool movedLastTurn;
 
     public SpriteRenderer sr {get; private set;}
     public int moveDir {get; private set;}
     public Vector2 previousPiecePosition {get; private set;}
-    public bool movedLastTurn;
-    public Vector2 boardShape {get; private set;} = new Vector2(7,7);
+
+    public List<Vector2> CurrentMovements;
+    public List<Vector2> CurrentAttacks;
 
 
     public IMovement movementPattern {get; private set;}
@@ -24,7 +28,7 @@ public class PieceController : MonoBehaviour
     void Start()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
-        RefreshTeam();
+        RefreshPieceIdentity();
 
         movementPattern = gameObject.GetComponent<IMovement>();
         attackPattern = gameObject.GetComponent<IAttack>();
@@ -33,6 +37,18 @@ public class PieceController : MonoBehaviour
         previousPiecePosition = (Vector2)transform.position;
 
         BoardStateManager.Instance.ResetLastMove.AddListener(ResetLastMove);
+        BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdate);
+    }
+
+    private void BoardUpdate()
+    {
+        ClearMoves();
+    }
+
+    private void ClearMoves()
+    {
+        CurrentMovements = new List<Vector2>();
+        CurrentAttacks = new List<Vector2>();
     }
 
     public void ResetLastMove()
@@ -46,40 +62,43 @@ public class PieceController : MonoBehaviour
         movedLastTurn = true;
 
         transform.position = endPos;
+        RefreshPieceIdentity();
     }
 
-    public void RefreshTeam()
+    public void RefreshPieceIdentity()
     {
-        sr = gameObject.GetComponent<SpriteRenderer>();
+        if (sr == null) {sr = gameObject.GetComponent<SpriteRenderer>();}
         sr.color = (PieceTeam == Players.White) ? BoardDataManager.Instance.WhitePieceTeamColor : BoardDataManager.Instance.BlackPieceTeamColor;
     
-        Vector2 position = (Vector2)transform.position;
-        gameObject.name = PieceTeam.ToString() + " Piece at: (" + ((int)position.x).ToString() + "," + ((int)position.y).ToString() + ")";
+        gameObject.name = PieceTeam.ToString()+ " " + PieceType + " at: (" + ((int)transform.position.x).ToString() + "," + ((int)transform.position.y).ToString() + ")";
     }
 
 
-    public List<Vector2> FindCurrentPossibleMovements()
+    public List<Vector2> GetCurrentMovements()
     {
-        return movementPattern?.FindMovements();
+        if ((CurrentMovements == null) || (CurrentMovements.Count == 0)) {CurrentMovements = movementPattern?.FindMovements();}
+        return CurrentMovements;
     }
 
-    public List<Vector2> FindCurrentPossibleAttacks()
+    public List<Vector2> GetCurrentAttacks()
     {
-        return attackPattern?.FindAttacks();
+        if ((CurrentAttacks == null) || (CurrentAttacks.Count == 0)) {CurrentAttacks = attackPattern?.FindAttacks();}
+        return CurrentAttacks;
     }
 
-    public void SpawnMarkers()
+    //TODO move to board manager
+    public void SpawnMarkers() 
     {
         BoardStateManager.Instance.ClearAllMarkers();
 
-        List<Vector2> possibleMoves = FindCurrentPossibleMovements();
+        List<Vector2> possibleMoves = GetCurrentMovements();
         foreach (var location in possibleMoves)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, location, Quaternion.identity);
             BoardStateManager.Instance.Markers.Add(newMarker);
         }
 
-        List<Vector2> possibleAttack = FindCurrentPossibleAttacks();
+        List<Vector2> possibleAttack = GetCurrentAttacks();
         foreach (var location in possibleAttack)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, location, Quaternion.identity);
@@ -92,10 +111,10 @@ public class PieceController : MonoBehaviour
 
    public bool IsInBounds(Vector2 currentPos)
     {
-        if (currentPos.x > boardShape.x) return false;
+        if (currentPos.x > 7) return false;
         if (currentPos.x < 0) return false;
 
-        if (currentPos.y > boardShape.y) return false;
+        if (currentPos.y > 7) return false;
         if (currentPos.y < 0) return false;
 
         return true;

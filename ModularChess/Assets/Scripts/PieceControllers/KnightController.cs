@@ -5,12 +5,17 @@ using UnityEngine;
 public class KnightController : MonoBehaviour, IMovement, IAttack
 {
    private PieceController pieceController;
+   
+
+    [SerializeField] private Pieces _pieceType = Pieces.Bishop;
+    [SerializeField] private float _baseValue = 3;
 
     void Awake()
     {
         pieceController = gameObject.GetComponent<PieceController>();
+        pieceController.PieceType = _pieceType;
+        pieceController.PieceBaseValue = _baseValue;
     }
-
 
     private List<Vector2> FindCornersAtRange(Vector2 currentPos, int distanceToCorner)
     {

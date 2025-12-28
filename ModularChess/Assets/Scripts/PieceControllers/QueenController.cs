@@ -4,17 +4,28 @@ using UnityEngine;
 [RequireComponent(typeof(PieceController))]
 public class QueenController : MonoBehaviour, IMovement, IAttack
 {
-   private PieceController pieceController;
-   public List<Vector2> Directions = new List<Vector2>{Vector2.right, Vector2.left, Vector2.up, Vector2.down,
+    public int MovementRange;
+    public int AttackRange;
+
+    [HideInInspector] public List<Vector2> Directions = new List<Vector2>{Vector2.right, Vector2.left, Vector2.up, Vector2.down,
                                                     new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
-   public int MovementRange;
-   public int AttackRange;
+
+
+    [SerializeField] private Pieces _pieceType = Pieces.Queen;
+    [SerializeField] private float _baseValue = 9;
+
+
+    private PieceController pieceController;
+
 
 
     void Awake()
     {
         pieceController = gameObject.GetComponent<PieceController>();
+        pieceController.PieceType = _pieceType;
+        pieceController.PieceBaseValue = _baseValue;
     }
+
 
 
     public List<Vector2> FindMovements()

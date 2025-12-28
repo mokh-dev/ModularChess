@@ -13,6 +13,9 @@ public class BoardStateManager : MonoBehaviour
 
     public Dictionary<Vector2, GameObject> BoardGameObjects { get; private set;} = new Dictionary<Vector2, GameObject>();
     public Players CurrentTurn {get; private set;} 
+    public bool WhiteInCheck {get; private set;} 
+    public bool BlackInCheck {get; private set;} 
+
 
     public UnityEvent BoardUpdate;
     public UnityEvent ResetLastMove;
@@ -74,7 +77,7 @@ public class BoardStateManager : MonoBehaviour
         newPiece.transform.SetParent(_boardPiecesParent.transform);
 
         newPiece.GetComponent<PieceController>().PieceTeam = team;
-        newPiece.GetComponent<PieceController>().RefreshTeam();
+        newPiece.GetComponent<PieceController>().RefreshPieceIdentity();
 
         BoardGameObjects.Add(pos, newPiece);
     }
@@ -130,7 +133,7 @@ public class BoardStateManager : MonoBehaviour
     {
         PieceController currentPieceController = piece.GetComponent<PieceController>();
 
-        List<Vector2> possibleMovements = currentPieceController.FindCurrentPossibleMovements();
+        List<Vector2> possibleMovements = currentPieceController.GetCurrentMovements();
 
         if (possibleMovements.Contains(endPos)) return true;
 
@@ -141,7 +144,7 @@ public class BoardStateManager : MonoBehaviour
     {
         PieceController currentPieceController = piece.GetComponent<PieceController>();
 
-        List<Vector2> possibleAttacks = currentPieceController.FindCurrentPossibleAttacks();
+        List<Vector2> possibleAttacks = currentPieceController.GetCurrentAttacks();
 
         if (possibleAttacks.Contains(endPos)) return true;
 
@@ -206,4 +209,14 @@ public enum Players
 {
     White,
     Black,
+}
+
+public enum Pieces
+{
+    Pawn,
+    Knight,
+    Bishop,
+    Rook,
+    Queen,
+    King,
 }

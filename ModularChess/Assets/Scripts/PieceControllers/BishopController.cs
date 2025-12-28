@@ -4,15 +4,25 @@ using UnityEngine;
 [RequireComponent(typeof(PieceController))]
 public class BishopController : MonoBehaviour, IMovement, IAttack
 {
-   private PieceController pieceController;
-   public List<Vector2> Directions = new List<Vector2>{new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
-   public int MovementRange;
-   public int AttackRange;
+    public int MovementRange;
+    public int AttackRange;
+
+    [HideInInspector] public List<Vector2> Directions = new List<Vector2>{new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
+
+
+    [SerializeField] private Pieces _pieceType = Pieces.Bishop;
+    [SerializeField] private float _baseValue = 3;
+
+
+    private PieceController pieceController;
+
 
 
     void Awake()
     {
         pieceController = gameObject.GetComponent<PieceController>();
+        pieceController.PieceType = _pieceType;
+        pieceController.PieceBaseValue = _baseValue;
     }
 
 
