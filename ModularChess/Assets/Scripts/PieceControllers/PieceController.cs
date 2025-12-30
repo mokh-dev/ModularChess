@@ -36,11 +36,11 @@ public class PieceController : MonoBehaviour
         moveDir = (PieceTeam == Players.White) ? 1 : -1;
         previousPiecePosition = (Vector2)transform.position;
 
-        BoardStateManager.Instance.ResetLastMove.AddListener(ResetLastMove);
-        BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdate);
+        BoardPiecesManager.Instance.ResetLastMove.AddListener(ResetLastMove);
+        BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdated);
     }
 
-    private void BoardUpdate()
+    private void BoardUpdated()
     {
         ClearMoves();
     }
@@ -89,20 +89,20 @@ public class PieceController : MonoBehaviour
     //TODO move to board manager
     public void SpawnMarkers() 
     {
-        BoardStateManager.Instance.ClearAllMarkers();
+        BoardPiecesManager.Instance.ClearAllMarkers();
 
         List<Vector2> possibleMoves = GetCurrentMovements();
         foreach (var location in possibleMoves)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, location, Quaternion.identity);
-            BoardStateManager.Instance.Markers.Add(newMarker);
+            BoardPiecesManager.Instance.Markers.Add(newMarker);
         }
 
         List<Vector2> possibleAttack = GetCurrentAttacks();
         foreach (var location in possibleAttack)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, location, Quaternion.identity);
-            BoardStateManager.Instance.Markers.Add(newMarker);
+            BoardPiecesManager.Instance.Markers.Add(newMarker);
         }
     }
 
@@ -122,7 +122,7 @@ public class PieceController : MonoBehaviour
     public bool IsEmptyAtPos(Vector2 endPos)
     {  
         if (IsInBounds(endPos) == false) return false;
-        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(endPos, out GameObject obj) == true) return false;
+        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(endPos, out GameObject obj) == true) return false;
 
         return true;
     }
@@ -152,7 +152,7 @@ public class PieceController : MonoBehaviour
     {
         if (IsInBounds(attackPos) == false) return false;
 
-        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
+        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
             
         if (pieceAtAttackPos.GetComponent<PieceController>().PieceTeam == PieceTeam) return false;
 

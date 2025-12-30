@@ -3,22 +3,22 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-[CustomEditor(typeof(BoardStateManager))]
-public class BoardStateManagerEditor : Editor
+[CustomEditor(typeof(BoardPiecesManager))]
+public class BoardPiecesManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        BoardStateManager boardStateManager = (BoardStateManager)target;
+        BoardPiecesManager boardPiecesManager = (BoardPiecesManager)target;
 
         if (GUILayout.Button("Add Test Piece"))
         {
-            boardStateManager.AddTestPiece();
+            boardPiecesManager.AddTestPiece();
         }
 
         if (GUILayout.Button("Show Board Dictionary"))
         {
-            boardStateManager.PrintDictionary();
+            boardPiecesManager.PrintDictionary();
         }
     }
 }

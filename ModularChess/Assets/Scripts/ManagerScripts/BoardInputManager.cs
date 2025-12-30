@@ -34,12 +34,12 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     private void UnselectPiece()
     {
         _selectedPiece = null;
-        BoardStateManager.Instance.ClearAllMarkers();
+        BoardPiecesManager.Instance.ClearAllMarkers();
     }
 
     private void PlayMove(Vector2 endPos)
     {
-        BoardStateManager.Instance.MoveBoardPiece(_selectedPiece, endPos);
+        BoardPiecesManager.Instance.MoveBoardPiece(_selectedPiece, endPos);
 
         UnselectPiece();
     }
@@ -55,7 +55,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     {
         mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
 
-        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
+        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
         {
             if (IsCorrectTeam(piece) == true)
             {
@@ -67,7 +67,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (_selectedPiece == null) return;
 
-        if (BoardStateManager.Instance.CheckLegalMove(_selectedPiece, mouseDownPos) == true)
+        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece, mouseDownPos) == true)
         {
             PlayMove(mouseDownPos);
             return;
@@ -84,7 +84,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (mouseUpPos == mouseDownPos) return;
 
-        if (BoardStateManager.Instance.CheckLegalMove(_selectedPiece, mouseUpPos) == false)
+        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece, mouseUpPos) == false)
         {
             UnselectPiece();
             return;

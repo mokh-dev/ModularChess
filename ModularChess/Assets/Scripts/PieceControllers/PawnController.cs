@@ -46,7 +46,7 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
 
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
-        if (BoardStateManager.Instance.BoardGameObjects.TryGetValue(positionToCheck, out GameObject pieceInPosition) == false) return false;
+        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(positionToCheck, out GameObject pieceInPosition) == false) return false;
         if (pieceInPosition.GetComponent<PieceController>().PieceTeam == pieceController.PieceTeam) return false;
         if (pieceInPosition.TryGetComponent<PawnController>(out PawnController pawnInPosition) == false) return false;
         if (pawnInPosition.CanBeEnPasanted() == false) return false;
