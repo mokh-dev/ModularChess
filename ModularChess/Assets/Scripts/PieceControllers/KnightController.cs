@@ -2,20 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
-public class KnightController : MonoBehaviour, IMovement, IAttack
+public class KnightController : PieceMoveLogic
 {
-   private PieceController pieceController;
-   
-
-    [SerializeField] private Pieces _pieceType = Pieces.Bishop;
-    [SerializeField] private float _baseValue = 3;
-
-    void Awake()
+    public override List<Vector2> FindMovements()
     {
-        pieceController = gameObject.GetComponent<PieceController>();
-        pieceController.PieceType = _pieceType;
-        pieceController.PieceBaseValue = _baseValue;
+        List<Vector2> possibleMovements = KnightMovePositions(pieceController.CurrentPiecePosition);
+
+        return ValidateMovements(possibleMovements);
     }
+
+    public override List<Vector2> FindAttacks()
+    {
+        List<Vector2> possibleAttacks = KnightMovePositions(pieceController.CurrentPiecePosition);
+
+        return ValidateAttacks(possibleAttacks);
+    }
+
 
     private List<Vector2> FindCornersAtRange(Vector2 currentPos, int distanceToCorner)
     {
@@ -54,23 +56,5 @@ public class KnightController : MonoBehaviour, IMovement, IAttack
         }
 
         return possiblePositions;
-    }
-
-    public List<Vector2> FindMovements()
-    {
-        Vector2 currentPos = (Vector2)transform.position;
-
-        List<Vector2> possibleMovements = KnightMovePositions(currentPos);
-
-        return pieceController.ValidateMovements(possibleMovements);
-    }
-
-    public List<Vector2> FindAttacks()
-    {
-        Vector2 currentPos = (Vector2)transform.position;
-
-        List<Vector2> possibleAttacks = KnightMovePositions(currentPos);
-
-        return pieceController.ValidateAttacks(possibleAttacks);
     }
 }

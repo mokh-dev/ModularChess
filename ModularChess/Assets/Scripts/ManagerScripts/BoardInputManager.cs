@@ -39,7 +39,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private void PlayMove(Vector2 endPos)
     {
-        BoardPiecesManager.Instance.MoveBoardPiece(_selectedPiece, endPos);
+        BoardPiecesManager.Instance.MoveBoardPiece(_selectedPiece.GetComponent<PieceController>(), endPos);
 
         UnselectPiece();
     }
@@ -55,11 +55,12 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     {
         mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
 
-        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(mouseDownPos, out GameObject piece) == true)
+        if (BoardPiecesManager.Instance.BoardPieces.TryGetValue(mouseDownPos, out PieceController pieceController) == true)
         {
-            if (IsCorrectTeam(piece) == true)
+            GameObject pieceObj = pieceController.gameObject;
+            if (IsCorrectTeam(pieceObj) == true)
             {
-                SelectPiece(piece);
+                SelectPiece(pieceObj);
                 return;
             }
         }
@@ -67,7 +68,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (_selectedPiece == null) return;
 
-        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece, mouseDownPos) == true)
+        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece.GetComponent<PieceController>(), mouseDownPos) == true)
         {
             PlayMove(mouseDownPos);
             return;
@@ -84,7 +85,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (mouseUpPos == mouseDownPos) return;
 
-        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece, mouseUpPos) == false)
+        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece.GetComponent<PieceController>(), mouseUpPos) == false)
         {
             UnselectPiece();
             return;

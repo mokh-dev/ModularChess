@@ -2,30 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
-public class PawnController : MonoBehaviour, IMovement, IAttack
+public class PawnController : PieceMoveLogic
 {
-    public int MovementStep;
-    public int HomeRowStep;
+    public int MovementStep = 1;
+    public int HomeRowStep = 2;
 
-    [HideInInspector] public Dictionary<Vector2, Vector2> EnPasantEnemyMovementAttackPositions{get; private set;} = new Dictionary<Vector2, Vector2>();
-
-
-    [SerializeField] private Pieces _pieceType = Pieces.Pawn;
-    [SerializeField] private float _baseValue = 1;
-    private int _homeRow = 1;
+    public Dictionary<Vector2, Vector2> EnPasantEnemyMovementAttackPositions{get; private set;} = new Dictionary<Vector2, Vector2>();
 
 
-    private PieceController pieceController;
+    private int whiteHomeRow = 1;
+    private int blackHomeRow = 6;
 
 
-    void Awake()
-    {
-        pieceController = gameObject.GetComponent<PieceController>();
-        pieceController.PieceType = _pieceType;
-        pieceController.PieceBaseValue = _baseValue;
-
-        _homeRow = (int)transform.position.y;
-    }
 
     public void ClearEnPasantDict()
     {
@@ -34,42 +22,46 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
 
     public bool CanBeEnPasanted()
     {
-        if (pieceController.movedLastTurn == false) return false;
-        if (pieceController.previousPiecePosition.y != _homeRow) return false;
-        
-        Vector2 homeRowStepPos = new Vector2(pieceController.previousPiecePosition.x, pieceController.previousPiecePosition.y + (HomeRowStep * pieceController.moveDir));
+        int homeRow = (pieceController.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow; 
 
-        if (homeRowStepPos != (Vector2)transform.position) return false;
+        if (pieceController.movedLastTurn == false) return false;
+        if (pieceController.PreviousPiecePosition.y != homeRow) return false;
+        
+        Vector2 homeRowStepPos = new Vector2(pieceController.PreviousPiecePosition.x, pieceController.PreviousPiecePosition.y + (HomeRowStep * pieceController.MoveDir));
+
+        if (homeRowStepPos != (Vector2)pieceController.CurrentPiecePosition) return false;
 
         return true;
     }
 
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
-        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(positionToCheck, out GameObject pieceInPosition) == false) return false;
-        if (pieceInPosition.GetComponent<PieceController>().PieceTeam == pieceController.PieceTeam) return false;
-        if (pieceInPosition.TryGetComponent<PawnController>(out PawnController pawnInPosition) == false) return false;
-        if (pawnInPosition.CanBeEnPasanted() == false) return false;
+        if (BoardPiecesManager.Instance.BoardPieces.TryGetValue(positionToCheck, out PieceController pieceInPosition) == false) return false;
+        if (pieceInPosition.PieceTeam == pieceController.PieceTeam) return false;
+        if (pieceInPosition.PieceType != Pieces.Pawn) return false; 
+        if (((PawnController)pieceInPosition.logic).CanBeEnPasanted() == false) return false;
 
         return true;
     }
 
 
-    public List<Vector2> FindMovements()
+    public override List<Vector2> FindMovements()
     {
-        Vector2 currentPos = (Vector2)transform.position;
+        int homeRow = (pieceController.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
+        
+        Vector2 currentPos = (Vector2)pieceController.CurrentPiecePosition;
         List<Vector2> possibleMoves = new List<Vector2>();
 
 
-        Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * pieceController.moveDir));
-        if (pieceController.IsValidMovement(oneStepPos)) {possibleMoves.Add(oneStepPos);}
+        Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * pieceController.MoveDir));
+        if (IsValidMovement(oneStepPos)) {possibleMoves.Add(oneStepPos);}
 
         
-        if (currentPos.y == _homeRow)
+        if (currentPos.y == homeRow)
         {
-            Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * pieceController.moveDir));
+            Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * pieceController.MoveDir));
 
-            if (pieceController.IsPathEmpty((Vector2)transform.position, homeRowStepPos) && pieceController.IsEmptyAtPos(homeRowStepPos))
+            if (IsPathEmpty((Vector2)pieceController.CurrentPiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
             {
                 possibleMoves.Add(homeRowStepPos);
             }            
@@ -78,13 +70,13 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
         return possibleMoves;
     }
 
-    public List<Vector2> FindAttacks()
+    public override List<Vector2> FindAttacks()
     {
-        Vector2 currentPos = (Vector2)transform.position;
+        Vector2 currentPos = (Vector2)pieceController.CurrentPiecePosition;
         List<Vector2> possibleAttackPositions = new List<Vector2>();
 
-        Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (1*pieceController.moveDir));
-        Vector2 leftPos = new Vector2(currentPos.x-1, currentPos.y + (1*pieceController.moveDir));
+        Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (1*pieceController.MoveDir));
+        Vector2 leftPos = new Vector2(currentPos.x-1, currentPos.y + (1*pieceController.MoveDir));
 
         possibleAttackPositions.Add(rightPos);
         possibleAttackPositions.Add(leftPos);
@@ -92,7 +84,7 @@ public class PawnController : MonoBehaviour, IMovement, IAttack
         Vector2 rightEnPasantPos = new Vector2(currentPos.x+1, currentPos.y);
         Vector2 leftEnPasantPos = new Vector2(currentPos.x-1, currentPos.y);
 
-        List<Vector2> validNormalAttacks = pieceController.ValidateAttacks(possibleAttackPositions);
+        List<Vector2> validNormalAttacks = ValidateAttacks(possibleAttackPositions);
 
         ClearEnPasantDict();
 

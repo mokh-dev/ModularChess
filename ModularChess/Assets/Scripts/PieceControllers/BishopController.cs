@@ -2,42 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
-public class BishopController : MonoBehaviour, IMovement, IAttack
+public class BishopController : PieceMoveLogic
 {
-    public int MovementRange;
-    public int AttackRange;
+    public int MovementRange = 8;
+    public int AttackRange = 8;
 
-    [HideInInspector] public List<Vector2> Directions = new List<Vector2>{new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
-
-
-    [SerializeField] private Pieces _pieceType = Pieces.Bishop;
-    [SerializeField] private float _baseValue = 3;
-
-
-    private PieceController pieceController;
+    public List<Vector2> Directions = new List<Vector2>{new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1)};
 
 
 
-    void Awake()
+    public override List<Vector2> FindMovements()
     {
-        pieceController = gameObject.GetComponent<PieceController>();
-        pieceController.PieceType = _pieceType;
-        pieceController.PieceBaseValue = _baseValue;
+        return FindLaneMovementsInDirections(Directions, pieceController.CurrentPiecePosition, MovementRange);
     }
 
-
-    public List<Vector2> FindMovements()
+    public override List<Vector2> FindAttacks()
     {
-        Vector2 currentPos = (Vector2)transform.position;
-
-        return pieceController.FindLaneMovementsInDirections(Directions, currentPos, MovementRange);
-    }
-
-    public List<Vector2> FindAttacks()
-    {
-        Vector2 currentPos = (Vector2)transform.position;
-
-        return pieceController.FindLaneAttacksInDirections(Directions, currentPos, AttackRange);
+        return FindLaneAttacksInDirections(Directions, pieceController.CurrentPiecePosition, AttackRange);
     }
 }
 

@@ -6,38 +6,74 @@ using UnityEngine;
 public class PieceController : MonoBehaviour
 {
 
-    public Players PieceTeam;
-    public Pieces PieceType;
-    public float PieceBaseValue;
-    public float PieceOverallValue;
-    public bool movedLastTurn;
-
-    public SpriteRenderer sr {get; private set;}
-    public int moveDir {get; private set;}
-    public Vector2 previousPiecePosition {get; private set;}
-
-    public List<Vector2> CurrentMovements;
-    public List<Vector2> CurrentAttacks;
-
-
-    public IMovement movementPattern {get; private set;}
-    public IAttack attackPattern {get; private set;}
-
     
+    public Pieces PieceType;
+
+    [HideInInspector] public Players PieceTeam;
+    [HideInInspector] public PieceMoveLogic logic;
+    [HideInInspector] public float PieceBaseValue;
+    [HideInInspector] public float PieceOverallValue;
+    [HideInInspector] public bool movedLastTurn;
+
+    [HideInInspector] public List<Vector2> CurrentMovements;
+    [HideInInspector] public List<Vector2> CurrentAttacks;
+
+    public int MoveDir {get; private set;}
+    public Vector2 CurrentPiecePosition {get; private set;}
+    public Vector2 PreviousPiecePosition {get; private set;}
+
+    private SpriteRenderer sr;
+
+
+
 
     void Start()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
         RefreshPieceIdentity();
 
-        movementPattern = gameObject.GetComponent<IMovement>();
-        attackPattern = gameObject.GetComponent<IAttack>();
+        logic = (logic == null) ? GetLogicFromPieceType(PieceType) : logic;   
+        logic.pieceController = this;
 
-        moveDir = (PieceTeam == Players.White) ? 1 : -1;
-        previousPiecePosition = (Vector2)transform.position;
+        MoveDir = (PieceTeam == Players.White) ? 1 : -1;
+
+        PreviousPiecePosition = (Vector2)transform.position;
+        CurrentPiecePosition = (Vector2)transform.position;
 
         BoardPiecesManager.Instance.ResetLastMove.AddListener(ResetLastMove);
         BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdated);
+    }
+    private PieceMoveLogic GetLogicFromPieceType(Pieces pieceType)
+    {
+        switch (pieceType)
+        {
+            case Pieces.Pawn:
+                PieceBaseValue = 1;
+                return new PawnController();
+            
+            case Pieces.Knight:
+                PieceBaseValue = 3;
+                return new KnightController();    
+
+            case Pieces.Bishop:
+                PieceBaseValue = 3;
+                return new BishopController();     
+
+            case Pieces.Rook:
+                PieceBaseValue = 5;
+                return new RookController(); 
+
+            case Pieces.Queen:
+                PieceBaseValue = 9;
+                return new QueenController();  
+
+            case Pieces.King:
+                PieceBaseValue = Mathf.Infinity;
+                return new KingController();        
+            
+            default:
+                return null;
+        }
     }
 
     private void BoardUpdated()
@@ -58,10 +94,12 @@ public class PieceController : MonoBehaviour
 
     public void MovePiece(Vector2 endPos)
     {
-        previousPiecePosition = (Vector2)transform.position;
+        PreviousPiecePosition = (Vector2)transform.position;
         movedLastTurn = true;
 
         transform.position = endPos;
+        CurrentPiecePosition = (Vector2)transform.position;
+
         RefreshPieceIdentity();
     }
 
@@ -76,13 +114,13 @@ public class PieceController : MonoBehaviour
 
     public List<Vector2> GetCurrentMovements()
     {
-        if ((CurrentMovements == null) || (CurrentMovements.Count == 0)) {CurrentMovements = movementPattern?.FindMovements();}
+        if ((CurrentMovements == null) || (CurrentMovements.Count == 0)) {CurrentMovements = logic.FindMovements();}
         return CurrentMovements;
     }
 
     public List<Vector2> GetCurrentAttacks()
     {
-        if ((CurrentAttacks == null) || (CurrentAttacks.Count == 0)) {CurrentAttacks = attackPattern?.FindAttacks();}
+        if ((CurrentAttacks == null) || (CurrentAttacks.Count == 0)) {CurrentAttacks = logic.FindAttacks();}
         return CurrentAttacks;
     }
 
@@ -109,214 +147,4 @@ public class PieceController : MonoBehaviour
 
 
 
-   public bool IsInBounds(Vector2 currentPos)
-    {
-        if (currentPos.x > 7) return false;
-        if (currentPos.x < 0) return false;
-
-        if (currentPos.y > 7) return false;
-        if (currentPos.y < 0) return false;
-
-        return true;
-    }
-    public bool IsEmptyAtPos(Vector2 endPos)
-    {  
-        if (IsInBounds(endPos) == false) return false;
-        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(endPos, out GameObject obj) == true) return false;
-
-        return true;
-    }
-    public bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
-    {
-        Vector2 direction = DirectionalizeVector2(endPos - currentPos);
-        Vector2 iteratedPos = currentPos + direction;
-
-        while (iteratedPos != endPos)
-        {
-            if (IsValidMovement(iteratedPos) == false) return false;
-            iteratedPos += direction;
-        }
-
-        return true;
-    }
-    private Vector2 DirectionalizeVector2(Vector2 vector)
-    {
-        return new Vector2(
-            Math.Sign(vector.x),
-            Math.Sign(vector.y)
-        );
-    }
-
-
-    public bool IsValidAttack(Vector2 attackPos)
-    {
-        if (IsInBounds(attackPos) == false) return false;
-
-        if (BoardPiecesManager.Instance.BoardGameObjects.TryGetValue(attackPos, out GameObject pieceAtAttackPos) == false) return false;
-            
-        if (pieceAtAttackPos.GetComponent<PieceController>().PieceTeam == PieceTeam) return false;
-
-        return true;
-    }
-    public List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions)
-    {
-        List<Vector2> validAttackPositions = new List<Vector2>();
-
-        foreach (var possibleAttackPos in possibleAttackPositions)
-        {
-            if (IsValidAttack(possibleAttackPos) == false) continue;
-
-            validAttackPositions.Add(possibleAttackPos);
-        }
-
-        return validAttackPositions;
-    }
-    public bool IsValidMovement(Vector2 possibleMovementPos)
-    {
-        if (IsInBounds(possibleMovementPos) == false) return false;
-        if (IsEmptyAtPos(possibleMovementPos) == false) return false;
-
-        return true;
-    }
-    public List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)
-    {
-        List<Vector2> validMovementPositions = new List<Vector2>();
-
-        foreach (var possibleMovementPos in possibleMovementPositions)
-        {
-            if (IsValidMovement(possibleMovementPos) == false) continue;
-
-            validMovementPositions.Add(possibleMovementPos);
-        }
-
-        return validMovementPositions;
-    }
-
-
-
-
-
-
-    private int[] FindDiameterValuesOnAxis(int valueCount, int startingValue, int radius)
-    {
-        int[] values = new int[valueCount];
-
-        for (int i = 0; i < valueCount; i++)
-        {
-            values[i] = startingValue - radius + i;
-        }
-
-        return values;
-    }
-
-    public List<Vector2> FindSquarePositionsAtRange(Vector2 currentPos, int distanceToCorner)
-    {
-        if (distanceToCorner < 1) return new List<Vector2>();
-
-        List<Vector2> squarePositions = new List<Vector2>();
-
-        int diameterValueCount = 1 + 2*distanceToCorner;
-
-        int[] xDiameterValues;
-        int[] yDiameterValues;
-
-        xDiameterValues = FindDiameterValuesOnAxis(diameterValueCount, (int)currentPos.x, distanceToCorner);
-        yDiameterValues = FindDiameterValuesOnAxis(diameterValueCount, (int)currentPos.y, distanceToCorner);
-
-
-        foreach (int xValue in xDiameterValues)
-        {
-            foreach (int yValue in yDiameterValues)
-            {
-                squarePositions.Add(new Vector2(xValue, yValue));
-            }
-        }
-
-        return squarePositions;
-    }
-
-    public List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        Vector2 slidingPos = currentPos + direction;
-        while (IsInBounds(slidingPos) && slideDistance > 0)
-        {
-            if (IsEmptyAtPos(slidingPos) == false) break;
-            possibleMoves.Add(slidingPos);
-            slidingPos += direction;
-
-            slideDistance--;
-        }
-
-        return possibleMoves;
-    }
-
-    public bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance)
-    {
-        Vector2 attackPos;
-        Vector2 lastPosition;
-
-        List<Vector2> slidingMovements = FindSlidingMovements(currentPos, direction, slideDistance);
-
-        if (slidingMovements.Count == 0)
-        {
-            lastPosition = currentPos;
-        }
-        else
-        {
-            lastPosition = slidingMovements.LastOrDefault();
-        }
-
-
-        attackPos = lastPosition + direction;
-        
-        if (IsValidAttack(attackPos) == true)
-        {
-            validAttack = attackPos;
-            return true;  
-        } 
-
-        validAttack = default;
-        return false;
-    }
-
-    public List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
-    {
-        List<Vector2> laneMovements = new List<Vector2>();
-
-        for (int i = 0; i < directions.Count; i++)
-        {
-            laneMovements.AddRange(FindSlidingMovements(currentPos, directions[i], slideDistance));
-        }
-
-        return laneMovements;
-    }
-
-    public List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
-    {
-        List<Vector2> laneAttacks = new List<Vector2>();
-
-        for (int i = 0; i < directions.Count; i++)
-        {
-            if (TryFindSlidingAttack(out Vector2 possibleAttack, currentPos, directions[i], slideDistance) == false) continue;
-            if (IsInBounds(possibleAttack) == false) continue;
-            laneAttacks.Add(possibleAttack);
-        }
-
-        return laneAttacks;
-    }
-
-
 }
-
-public interface IMovement
-{
-    List<Vector2> FindMovements();
-}
-
-public interface IAttack
-{
-    List<Vector2> FindAttacks();
-}
-

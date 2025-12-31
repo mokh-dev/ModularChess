@@ -2,40 +2,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PieceController))]
-public class KingController : MonoBehaviour, IMovement, IAttack
+public class KingController : PieceMoveLogic
 {
-    public int MovementRange;
-    public int AttackRange;
-
-    [SerializeField] private Pieces _pieceType = Pieces.Rook;
-    [SerializeField] private float _baseValue = Mathf.Infinity;
+    public int MovementRange = 1;
+    public int AttackRange = 1;
 
 
-    private PieceController pieceController;
 
-
-    void Awake()
+    public override List<Vector2> FindMovements()
     {
-        pieceController = gameObject.GetComponent<PieceController>();
-        pieceController.PieceType = _pieceType;
-        pieceController.PieceBaseValue = _baseValue;
+        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(pieceController.CurrentPiecePosition, MovementRange);
+
+        return ValidateMovements(possibleSquareMovements);
     }
 
-    public List<Vector2> FindMovements()
+    public override List<Vector2> FindAttacks()
     {
-        Vector2 currentPos = (Vector2)transform.position;
+        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(pieceController.CurrentPiecePosition, MovementRange);
 
-        List<Vector2> possibleSquareMovements = pieceController.FindSquarePositionsAtRange(currentPos, MovementRange);
-
-        return pieceController.ValidateMovements(possibleSquareMovements);
-    }
-
-    public List<Vector2> FindAttacks()
-    {
-        Vector2 currentPos = (Vector2)transform.position;
-
-        List<Vector2> possibleSquareAttacks = pieceController.FindSquarePositionsAtRange(currentPos, MovementRange);
-
-        return pieceController.ValidateAttacks(possibleSquareAttacks);
+        return ValidateAttacks(possibleSquareAttacks);
     }
 }

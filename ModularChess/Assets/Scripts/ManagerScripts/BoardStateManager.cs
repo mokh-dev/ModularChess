@@ -56,6 +56,14 @@ public class BoardStateManager : MonoBehaviour
 
 }
 
+public struct BoardState
+{
+    Dictionary<Vector2, PieceController> BoardPieces;
+    // cards or effects in play
+    Players CurrentTurn;
+
+}
+
 public enum Players
 {
     White,
