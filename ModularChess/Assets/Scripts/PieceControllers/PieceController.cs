@@ -2,126 +2,73 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PieceController : MonoBehaviour
 {
-
-    
-    public Pieces PieceType;
-
-    [HideInInspector] public Players PieceTeam;
-    [HideInInspector] public PieceMoveLogic logic;
-    [HideInInspector] public float PieceBaseValue;
-    [HideInInspector] public float PieceOverallValue;
-    [HideInInspector] public bool movedLastTurn;
-
-    [HideInInspector] public List<Vector2> CurrentMovements;
-    [HideInInspector] public List<Vector2> CurrentAttacks;
-
-    public int MoveDir {get; private set;}
-    public Vector2 CurrentPiecePosition {get; private set;}
-    public Vector2 PreviousPiecePosition {get; private set;}
-
     private SpriteRenderer sr;
+    public PieceTypes PieceObjType;
+    public Players PieceObjTeam;
+    public Piece piece;
 
 
-
-
-    void Start()
+    public void InitializePieceObj()
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
+        sr.sprite = BoardDataManager.Instance.GetSpriteFromPieceType(PieceObjType);
+
+        InitializePiece((Vector2)transform.position, (Vector2)transform.position, PieceObjType, PieceObjTeam, 0);
+
         RefreshPieceIdentity();
-
-        logic = (logic == null) ? GetLogicFromPieceType(PieceType) : logic;   
-        logic.pieceController = this;
-
-        MoveDir = (PieceTeam == Players.White) ? 1 : -1;
-
-        PreviousPiecePosition = (Vector2)transform.position;
-        CurrentPiecePosition = (Vector2)transform.position;
-
-        BoardPiecesManager.Instance.ResetLastMove.AddListener(ResetLastMove);
-        BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdated);
-    }
-    private PieceMoveLogic GetLogicFromPieceType(Pieces pieceType)
-    {
-        switch (pieceType)
-        {
-            case Pieces.Pawn:
-                PieceBaseValue = 1;
-                return new PawnController();
-            
-            case Pieces.Knight:
-                PieceBaseValue = 3;
-                return new KnightController();    
-
-            case Pieces.Bishop:
-                PieceBaseValue = 3;
-                return new BishopController();     
-
-            case Pieces.Rook:
-                PieceBaseValue = 5;
-                return new RookController(); 
-
-            case Pieces.Queen:
-                PieceBaseValue = 9;
-                return new QueenController();  
-
-            case Pieces.King:
-                PieceBaseValue = Mathf.Infinity;
-                return new KingController();        
-            
-            default:
-                return null;
-        }
     }
 
-    private void BoardUpdated()
+    public void InitializePiece(Vector2 currentPos, Vector2 previousPos, PieceTypes pieceType, Players team, int currentTurnCount)
     {
-        ClearMoves();
+        piece = new Piece();
+
+        piece.CurrentTurnCount = currentTurnCount;
+
+        piece.PieceType = pieceType;
+        piece.PieceTeam = team;
+
+        piece.logic = (piece.logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.logic;   
+        
+        piece.CurrentPiecePosition = currentPos;
+        piece.PreviousPiecePosition = previousPos;
+
+        piece.logic.piece = piece; 
     }
 
-    private void ClearMoves()
-    {
-        CurrentMovements = new List<Vector2>();
-        CurrentAttacks = new List<Vector2>();
-    }
 
-    public void ResetLastMove()
-    {
-        movedLastTurn = false;
-    }
+    // private void BoardUpdated()
+    // {
+    //     ClearMoves();
+    // }
 
-    public void MovePiece(Vector2 endPos)
-    {
-        PreviousPiecePosition = (Vector2)transform.position;
-        movedLastTurn = true;
+    // private void ClearMoves()
+    // {
+    //     piece.CurrentMovements = new List<Vector2>();
+    //     piece.CurrentAttacks = new List<Vector2>();
+    // }
 
+    public void MovePieceObj(Vector2 endPos)
+    {    
+        Vector2 previousPos = (Vector2)transform.position;
         transform.position = endPos;
-        CurrentPiecePosition = (Vector2)transform.position;
 
+        int currentTurnCount = BoardStateManager.Instance.CurrentBoardState.TurnCount;
+        Debug.Log(piece.CurrentPiecePosition);
+        InitializePiece(endPos, previousPos, PieceObjType, PieceObjTeam, currentTurnCount);
+        Debug.Log("Initialize new piece current pos:" + piece.CurrentPiecePosition);
         RefreshPieceIdentity();
     }
 
     public void RefreshPieceIdentity()
     {
         if (sr == null) {sr = gameObject.GetComponent<SpriteRenderer>();}
-        sr.color = (PieceTeam == Players.White) ? BoardDataManager.Instance.WhitePieceTeamColor : BoardDataManager.Instance.BlackPieceTeamColor;
+        sr.color = (PieceObjTeam == Players.White) ? BoardDataManager.Instance.WhitePieceTeamColor : BoardDataManager.Instance.BlackPieceTeamColor;
     
-        gameObject.name = PieceTeam.ToString()+ " " + PieceType + " at: (" + ((int)transform.position.x).ToString() + "," + ((int)transform.position.y).ToString() + ")";
-    }
-
-
-    public List<Vector2> GetCurrentMovements()
-    {
-        if ((CurrentMovements == null) || (CurrentMovements.Count == 0)) {CurrentMovements = logic.FindMovements();}
-        return CurrentMovements;
-    }
-
-    public List<Vector2> GetCurrentAttacks()
-    {
-        if ((CurrentAttacks == null) || (CurrentAttacks.Count == 0)) {CurrentAttacks = logic.FindAttacks();}
-        return CurrentAttacks;
+        gameObject.name = piece.PieceTeam.ToString()+ " " + piece.PieceType + " at: (" + ((int)transform.position.x).ToString() + "," + ((int)transform.position.y).ToString() + ")";
     }
 
     //TODO move to board manager
@@ -129,22 +76,18 @@ public class PieceController : MonoBehaviour
     {
         BoardPiecesManager.Instance.ClearAllMarkers();
 
-        List<Vector2> possibleMoves = GetCurrentMovements();
+        List<Vector2> possibleMoves = piece.GetCurrentMovements();
         foreach (var location in possibleMoves)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, location, Quaternion.identity);
             BoardPiecesManager.Instance.Markers.Add(newMarker);
         }
 
-        List<Vector2> possibleAttack = GetCurrentAttacks();
+        List<Vector2> possibleAttack = piece.GetCurrentAttacks();
         foreach (var location in possibleAttack)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, location, Quaternion.identity);
             BoardPiecesManager.Instance.Markers.Add(newMarker);
         }
     }
-
-
-
-
 }

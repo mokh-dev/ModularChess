@@ -39,14 +39,18 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private void PlayMove(Vector2 endPos)
     {
-        BoardPiecesManager.Instance.MoveBoardPiece(_selectedPiece.GetComponent<PieceController>(), endPos);
+        BoardMove boardMove = new BoardMove();
+        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, endPos);
+
+        //TODO turn this from a function call to a unity event
+        BoardStateManager.Instance.PlayMove(_selectedPiece.GetComponent<PieceController>(), boardMove);
 
         UnselectPiece();
     }
 
     private bool IsCorrectTeam(GameObject piece)
     {
-        if (BoardStateManager.Instance.CurrentTurn == piece.GetComponent<PieceController>().PieceTeam) return true;
+        if (BoardStateManager.Instance.CurrentBoardState.PlayerTurn == piece.GetComponent<PieceController>().piece.PieceTeam) return true;
         return false;
     }
 
@@ -55,7 +59,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     {
         mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
 
-        if (BoardPiecesManager.Instance.BoardPieces.TryGetValue(mouseDownPos, out PieceController pieceController) == true)
+        if (BoardPiecesManager.Instance.BoardPieceObjects.TryGetValue(mouseDownPos, out PieceController pieceController) == true)
         {
             GameObject pieceObj = pieceController.gameObject;
             if (IsCorrectTeam(pieceObj) == true)
@@ -65,10 +69,9 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
             }
         }
 
-
         if (_selectedPiece == null) return;
 
-        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece.GetComponent<PieceController>(), mouseDownPos) == true)
+        if (IsValidMove(mouseDownPos) == true)
         {
             PlayMove(mouseDownPos);
             return;
@@ -85,7 +88,10 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (mouseUpPos == mouseDownPos) return;
 
-        if (BoardPiecesManager.Instance.CheckLegalMove(_selectedPiece.GetComponent<PieceController>(), mouseUpPos) == false)
+        BoardMove boardMove = new BoardMove();
+        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, mouseDownPos);
+
+        if (IsValidMove(mouseUpPos) == false)
         {
             UnselectPiece();
             return;
@@ -93,5 +99,15 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         PlayMove(mouseUpPos);
         
+    }
+
+    private bool IsValidMove(Vector2 endPos)
+    {
+        BoardMove boardMove = new BoardMove();
+        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, endPos);
+        
+        if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove) == true) return true;
+
+        return false;
     }
 }

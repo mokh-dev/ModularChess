@@ -6,14 +6,14 @@ public class KnightController : PieceMoveLogic
 {
     public override List<Vector2> FindMovements()
     {
-        List<Vector2> possibleMovements = KnightMovePositions(pieceController.CurrentPiecePosition);
+        List<Vector2> possibleMovements = KnightMovePositions(piece.CurrentPiecePosition);
 
         return ValidateMovements(possibleMovements);
     }
 
     public override List<Vector2> FindAttacks()
     {
-        List<Vector2> possibleAttacks = KnightMovePositions(pieceController.CurrentPiecePosition);
+        List<Vector2> possibleAttacks = KnightMovePositions(piece.CurrentPiecePosition);
 
         return ValidateAttacks(possibleAttacks);
     }

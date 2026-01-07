@@ -12,12 +12,12 @@ public class RookController : PieceMoveLogic
 
     public override List<Vector2> FindMovements()
     {
-        return FindLaneMovementsInDirections(Directions, pieceController.CurrentPiecePosition, MovementRange);
+        return FindLaneMovementsInDirections(Directions, piece.CurrentPiecePosition, MovementRange);
     }
 
     public override List<Vector2> FindAttacks()
     {
-        return FindLaneAttacksInDirections(Directions, pieceController.CurrentPiecePosition, AttackRange);
+        return FindLaneAttacksInDirections(Directions, piece.CurrentPiecePosition, AttackRange);
     }
 }
 

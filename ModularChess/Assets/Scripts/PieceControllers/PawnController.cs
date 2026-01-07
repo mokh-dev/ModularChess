@@ -5,6 +5,7 @@ using UnityEngine;
 public class PawnController : PieceMoveLogic
 {
     public int MovementStep = 1;
+    public int AttackStep = 1;
     public int HomeRowStep = 2;
 
     public Dictionary<Vector2, Vector2> EnPasantEnemyMovementAttackPositions{get; private set;} = new Dictionary<Vector2, Vector2>();
@@ -22,23 +23,25 @@ public class PawnController : PieceMoveLogic
 
     public bool CanBeEnPasanted()
     {
-        int homeRow = (pieceController.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow; 
+        int homeRow = (piece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow; 
+        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
 
-        if (pieceController.movedLastTurn == false) return false;
-        if (pieceController.PreviousPiecePosition.y != homeRow) return false;
+        //FIXME en pasant
+        // if (piece.movedLastTurn == false) return false;
+        if (piece.PreviousPiecePosition.y != homeRow) return false;
         
-        Vector2 homeRowStepPos = new Vector2(pieceController.PreviousPiecePosition.x, pieceController.PreviousPiecePosition.y + (HomeRowStep * pieceController.MoveDir));
+        Vector2 homeRowStepPos = new Vector2(piece.PreviousPiecePosition.x, piece.PreviousPiecePosition.y + (HomeRowStep * moveDir));
 
-        if (homeRowStepPos != (Vector2)pieceController.CurrentPiecePosition) return false;
+        if (homeRowStepPos != piece.CurrentPiecePosition) return false;
 
         return true;
     }
 
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
-        if (BoardPiecesManager.Instance.BoardPieces.TryGetValue(positionToCheck, out PieceController pieceInPosition) == false) return false;
-        if (pieceInPosition.PieceTeam == pieceController.PieceTeam) return false;
-        if (pieceInPosition.PieceType != Pieces.Pawn) return false; 
+        if (currentBoardState.BoardPieces.TryGetValue(positionToCheck, out Piece pieceInPosition) == false) return false;
+        if (pieceInPosition.PieceTeam == piece.PieceTeam) return false;
+        if (pieceInPosition.PieceType != PieceTypes.Pawn) return false; 
         if (((PawnController)pieceInPosition.logic).CanBeEnPasanted() == false) return false;
 
         return true;
@@ -47,21 +50,22 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindMovements()
     {
-        int homeRow = (pieceController.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
+        int homeRow = (piece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
+        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
         
-        Vector2 currentPos = (Vector2)pieceController.CurrentPiecePosition;
+        Vector2 currentPos = piece.CurrentPiecePosition;
         List<Vector2> possibleMoves = new List<Vector2>();
 
 
-        Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * pieceController.MoveDir));
+        Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * moveDir));
         if (IsValidMovement(oneStepPos)) {possibleMoves.Add(oneStepPos);}
 
-        
+
         if (currentPos.y == homeRow)
         {
-            Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * pieceController.MoveDir));
+            Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * moveDir));
 
-            if (IsPathEmpty((Vector2)pieceController.CurrentPiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
+            if (IsPathEmpty(piece.CurrentPiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
             {
                 possibleMoves.Add(homeRowStepPos);
             }            
@@ -72,11 +76,13 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindAttacks()
     {
-        Vector2 currentPos = (Vector2)pieceController.CurrentPiecePosition;
+        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
+
+        Vector2 currentPos = piece.CurrentPiecePosition;
         List<Vector2> possibleAttackPositions = new List<Vector2>();
 
-        Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (1*pieceController.MoveDir));
-        Vector2 leftPos = new Vector2(currentPos.x-1, currentPos.y + (1*pieceController.MoveDir));
+        Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (AttackStep * moveDir));
+        Vector2 leftPos = new Vector2(currentPos.x-1, currentPos.y + (AttackStep * moveDir));
 
         possibleAttackPositions.Add(rightPos);
         possibleAttackPositions.Add(leftPos);

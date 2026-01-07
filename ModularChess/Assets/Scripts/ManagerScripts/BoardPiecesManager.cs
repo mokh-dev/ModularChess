@@ -8,25 +8,24 @@ public class BoardPiecesManager : MonoBehaviour
     public static BoardPiecesManager Instance { get { return instance; } }
 
 
-    public Dictionary<Vector2, PieceController> BoardPieces { get; private set;} = new Dictionary<Vector2, PieceController>();
-    public bool WhiteInCheck {get; private set;} 
-    public bool BlackInCheck {get; private set;} 
+    public Dictionary<Vector2, PieceController> BoardPieceObjects = new Dictionary<Vector2, PieceController>();
+
+    public GameObject BoardPiecesParent;
+
     public List<GameObject> Markers = new List<GameObject>();
 
     public UnityEvent ResetLastMove;
 
+    
 
-    [SerializeField] private GameObject _boardPiecesParent;
 
     [Header("---Test---")]
-    [SerializeField] private GameObject testPiecePre;
-    [SerializeField] private Vector2 _testPiecePos;
     [SerializeField] private Players _testPieceTeam;
+    [SerializeField] private PieceTypes _testPieceType;
+    [SerializeField] private Vector2 _testPiecePos;
 
 
 
-    private PieceController whiteKing;
-    private PieceController blackKing;
 
     private void Awake()
     {
@@ -38,36 +37,31 @@ public class BoardPiecesManager : MonoBehaviour
         }
 
 
-        LoadBoardToDict(); 
-
-        whiteKing = FindKingOfTeam(Players.White);
-        blackKing = FindKingOfTeam(Players.Black);
+        LoadBoardObjectsToDict();
     }
 
-    void Start()
+    private void LoadBoardObjectsToDict()
     {
-        BoardStateManager.Instance.BoardUpdate.AddListener(BoardUpdated);
+        foreach (var gameObjectTransform in BoardPiecesParent.GetComponentsInChildren<Transform>())
+        {
+            if (gameObjectTransform == BoardPiecesParent.transform) continue;
+
+            gameObjectTransform.gameObject.GetComponent<PieceController>().InitializePieceObj();
+            BoardPieceObjects.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject.GetComponent<PieceController>());
+        }  
     }
 
-    private void BoardUpdated()
+    public bool IsInCheck(BoardState boardState, Players teamToCheck)
     {
-        WhiteInCheck = IsInCheck(Players.White);
-        BlackInCheck = IsInCheck(Players.Black);
-    }
-
-    private bool IsInCheck(Players teamToCheck)
-    {
-        PieceController kingPiece = (teamToCheck == Players.White) ? whiteKing : blackKing;
-        Vector2 kingPosition = kingPiece.CurrentPiecePosition;
+        if (TryFindKingOfTeam(boardState, teamToCheck, out Piece kingPiece) == false) return false;
 
         Players enemyTeam = (teamToCheck == Players.White) ? Players.Black : Players.White;
-        List<Vector2> enemyAttackPositions = GetAllAttacksFromTeam(enemyTeam);
+        List<Vector2> enemyAttackPositions = GetAllAttacksFromTeam(boardState, enemyTeam);
 
         foreach (Vector2 attackPos in enemyAttackPositions)
         {
-            if (attackPos == kingPosition)
+            if (attackPos == kingPiece.CurrentPiecePosition)
             {
-                Debug.Log(teamToCheck.ToString() + " is in check");
                 return true;
             } 
         }
@@ -75,145 +69,117 @@ public class BoardPiecesManager : MonoBehaviour
         return false;
     }
 
-    private List<Vector2> GetAllAttacksFromTeam(Players team)
+    private List<Vector2> GetAllAttacksFromTeam(BoardState boardState, Players team)
     {
         List<Vector2> totalAttacks = new List<Vector2>();
 
-        foreach (KeyValuePair<Vector2, PieceController> boardObj in BoardPieces)
+        foreach (KeyValuePair<Vector2, Piece> piece in boardState.BoardPieces)
         {
-            PieceController objPieceController = boardObj.Value;
-            if (objPieceController.PieceTeam != team) continue;
+            if (piece.Value.PieceTeam != team) continue;
 
-            List<Vector2> pieceAttacks = objPieceController.GetCurrentAttacks();
+            List<Vector2> pieceAttacks = piece.Value.GetCurrentAttacks();
             totalAttacks.AddRange(pieceAttacks);
         } 
 
         return totalAttacks;
     }
 
-    private PieceController FindKingOfTeam(Players kingTeam)
+    private bool IsValidCheckDefenseMove()
     {
-        PieceController king = null;
-
-        foreach (KeyValuePair<Vector2, PieceController> boardObj in BoardPieces)
-        {
-            if (boardObj.Value.PieceType != Pieces.King) continue;
-            if (boardObj.Value.PieceTeam != kingTeam) continue;
-
-            king = boardObj.Value;
-            Debug.Log("Found king" + kingTeam);
-        }
-
-        return king;
-    }
-
-    private void LoadBoardToDict()
-    {
-        foreach (var gameObjectTransform in _boardPiecesParent.GetComponentsInChildren<Transform>())
-        {
-            if (gameObjectTransform == _boardPiecesParent.transform) continue;
-            BoardPieces.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject.GetComponent<PieceController>());
-        }
-    }
-
-
-    public void AddTestPiece()
-    {
-        AddNewPiece(testPiecePre, _testPiecePos, _testPieceTeam);
-    }
-
-
-    public void AddNewPiece(GameObject piecePre, Vector2 pos, Players team)
-    {
-        GameObject newPieceObj = Instantiate(piecePre, pos, Quaternion.identity);
-        newPieceObj.transform.SetParent(_boardPiecesParent.transform);
-
-        PieceController newPieceController = newPieceObj.GetComponent<PieceController>();
-
-        newPieceController.PieceTeam = team;
-        newPieceController.RefreshPieceIdentity();
-
-        BoardPieces.Add(pos, newPieceController);
-    }
-
-    public void AttackPieceAtPos(Vector2 pos)
-    {
-        Destroy(BoardPieces[pos].gameObject);
-        BoardPieces.Remove(pos);
-    }
-
-    public void MoveBoardPiece(PieceController pieceToMove, Vector2 endPos)
-    {
-        if (CheckLegalAttack(pieceToMove, endPos) == true) 
-        {
-            if (CheckForNonCaptureAttack(pieceToMove, endPos, out Vector2 attackPosition) == true)
-            {
-                AttackPieceAtPos(attackPosition);
-            }
-            else
-            {
-                AttackPieceAtPos(endPos);
-            }
-        }
-        else
-        {
-            if (CheckLegalMovement(pieceToMove, endPos) == false) return;
-        }
-
-        ResetLastMove.Invoke();
-
-        BoardPieces.Remove((Vector2)pieceToMove.transform.position);
-
-        pieceToMove.MovePiece(endPos);
-
-        BoardPieces.Add(endPos, pieceToMove);
-
-        BoardStateManager.Instance.EndPlayerTurn();
-        
-    }
-
-     
-
-    public bool CheckLegalMove(PieceController piece, Vector2 endPos)
-    {
-        if (CheckLegalMovement(piece, endPos) == true) return true;
-        if (CheckLegalAttack(piece, endPos) == true) return true;
-
+        //simulates move 
+        //checks if still in check
         return false;
     }
 
 
-    private bool CheckLegalMovement(PieceController piece, Vector2 endPos)
+    private bool TryFindKingOfTeam(BoardState boardState, Players kingTeam, out Piece kingPiece)
     {
-        if (piece.GetCurrentMovements().Contains(endPos)) return true;
+        kingPiece = default;
 
-        return false;
-    }
-
-    private bool CheckLegalAttack(PieceController piece, Vector2 endPos)
-    {
-        if (piece.GetCurrentAttacks().Contains(endPos)) return true;
-
-        return false;
-    }
-
-    private bool CheckForNonCaptureAttack(PieceController pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
-    {
-        attackPosition = default;
-
-        if (HandlePawnEnPasant(pieceToCheck, endPos, out Vector2 pawnAttackPosition) == true)
+        foreach (KeyValuePair<Vector2, Piece> boardPosPiece in boardState.BoardPieces)
         {
-            attackPosition = pawnAttackPosition;
+            if (boardPosPiece.Value.PieceType != PieceTypes.King) continue;
+            if (boardPosPiece.Value.PieceTeam != kingTeam) continue;
+
+            kingPiece = boardPosPiece.Value;
             return true;
         }
 
         return false;
     }
-    private bool HandlePawnEnPasant(PieceController pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
+
+
+
+    public void AddTestPiece()
+    {
+        AddNewPieceObj(_testPieceType, _testPiecePos, _testPieceTeam);
+    }
+
+
+    public void AddNewPieceObj(PieceTypes type, Vector2 pos, Players team) 
+    {
+        GameObject newPieceObj = Instantiate(BoardDataManager.Instance.BasePiecePre, pos, Quaternion.identity);
+        newPieceObj.transform.SetParent(BoardPiecesParent.transform);
+
+        PieceController newPieceController = newPieceObj.GetComponent<PieceController>();
+
+        newPieceController.PieceObjType = type;
+        newPieceController.PieceObjTeam = team;
+
+        newPieceController.InitializePieceObj();
+
+        BoardStateManager.Instance.CurrentBoardState.BoardPieces.Add(pos, newPieceController.piece);
+    }
+
+    
+    public void MoveBoardPieceObj(PieceController pieceControllerToMove, BoardMove move)
+    {
+        Vector2 endPostion = move.PieceMove.Item2;
+
+        BoardPieceObjects.Remove(pieceControllerToMove.piece.CurrentPiecePosition);
+
+        pieceControllerToMove.MovePieceObj(endPostion);
+
+        BoardPieceObjects.Add(endPostion, pieceControllerToMove);  
+    }
+
+    public void DestroyPieceObjAtPos(Vector2 pos)
+    {
+        Destroy(BoardPieceObjects[pos].gameObject);
+        BoardPieceObjects.Remove(pos);
+    }
+
+
+
+    // public bool CheckLegalMove(Piece piece, Vector2 endPos)
+    // {
+    //     if (CheckLegalMovement(piece, endPos) == true) return true;
+    //     if (CheckLegalAttack(piece, endPos) == true) return true;
+
+    //     return false;
+    // }
+
+
+    // private bool CheckLegalMovement(Piece piece, Vector2 endPos)
+    // {
+    //     if (piece.GetCurrentMovements().Contains(endPos)) return true;
+
+    //     return false;
+    // }
+
+    // private bool CheckLegalAttack(Piece piece, Vector2 endPos)
+    // {
+    //     if (piece.GetCurrentAttacks().Contains(endPos)) return true;
+
+    //     return false;
+    // }
+
+
+    public bool CheckForPawnEnPasant(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
         attackPosition = default;
 
-        if (pieceToCheck.PieceType != Pieces.Pawn) return false;
+        if (pieceToCheck.PieceType != PieceTypes.Pawn) return false;
 
         PawnController pawnController = (PawnController)pieceToCheck.logic;
         if (pawnController.EnPasantEnemyMovementAttackPositions.Count == 0) return false;
@@ -239,13 +205,22 @@ public class BoardPiecesManager : MonoBehaviour
 
     public void PrintDictionary()
     {
-        string output = "";
+        string outputPieces = "";
+        string outputControllers = "";
 
-        foreach (KeyValuePair<Vector2, PieceController> item in BoardPieces)
+        
+
+        foreach (KeyValuePair<Vector2, Piece> piece in BoardStateManager.Instance.CurrentBoardState.BoardPieces)
         {
-            output+= ", {" + item.Key.ToString() + ": " + item.Value.name.ToString() + "}";
+            outputPieces+= ", {" + piece.Value.CurrentPiecePosition.ToString() + ": " + piece.Value.PieceType.ToString() + "}";
         }
 
-        Debug.Log("Dictionary = [" + output + "]");
+        foreach (KeyValuePair<Vector2, PieceController> piece in BoardPieceObjects)
+        {
+            outputControllers+= ", {" + piece.Key.ToString() + ": " + piece.Value.gameObject.name.ToString() + "}";
+        }
+
+        Debug.Log("Dictionary = [" + outputPieces + "]");
+        Debug.Log("Dictionary = [" + outputControllers + "]");
     }
 }
