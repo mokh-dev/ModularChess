@@ -23,16 +23,15 @@ public class PawnController : PieceMoveLogic
 
     public bool CanBeEnPasanted()
     {
-        int homeRow = (piece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow; 
-        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
-
-        //FIXME en pasant
-        // if (piece.movedLastTurn == false) return false;
-        if (piece.PreviousPiecePosition.y != homeRow) return false;
+        int homeRow = (LogicPiece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow; 
+        int moveDir = (LogicPiece.PieceTeam == Players.White) ? 1 : -1; 
         
-        Vector2 homeRowStepPos = new Vector2(piece.PreviousPiecePosition.x, piece.PreviousPiecePosition.y + (HomeRowStep * moveDir));
+        Vector2 previousPosition = LogicPiece.PreviousPiecePositions[LogicPiece.TurnCount - 1];
 
-        if (homeRowStepPos != piece.CurrentPiecePosition) return false;
+        if (previousPosition.y != homeRow) return false;
+
+        Vector2 homeRowStepPos = new Vector2(previousPosition.x, previousPosition.y + (HomeRowStep * moveDir));
+        if (homeRowStepPos != LogicPiece.PiecePosition) return false;
 
         return true;
     }
@@ -40,8 +39,9 @@ public class PawnController : PieceMoveLogic
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
         if (currentBoardState.BoardPieces.TryGetValue(positionToCheck, out Piece pieceInPosition) == false) return false;
-        if (pieceInPosition.PieceTeam == piece.PieceTeam) return false;
+        if (pieceInPosition.PieceTeam == LogicPiece.PieceTeam) return false;
         if (pieceInPosition.PieceType != PieceTypes.Pawn) return false; 
+
         if (((PawnController)pieceInPosition.logic).CanBeEnPasanted() == false) return false;
 
         return true;
@@ -50,10 +50,10 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindMovements()
     {
-        int homeRow = (piece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
-        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
+        int homeRow = (LogicPiece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
+        int moveDir = (LogicPiece.PieceTeam == Players.White) ? 1 : -1; 
         
-        Vector2 currentPos = piece.CurrentPiecePosition;
+        Vector2 currentPos = LogicPiece.PiecePosition;
         List<Vector2> possibleMoves = new List<Vector2>();
 
 
@@ -65,7 +65,7 @@ public class PawnController : PieceMoveLogic
         {
             Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * moveDir));
 
-            if (IsPathEmpty(piece.CurrentPiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
+            if (IsPathEmpty(LogicPiece.PiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
             {
                 possibleMoves.Add(homeRowStepPos);
             }            
@@ -76,9 +76,9 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindAttacks()
     {
-        int moveDir = (piece.PieceTeam == Players.White) ? 1 : -1; 
+        int moveDir = (LogicPiece.PieceTeam == Players.White) ? 1 : -1; 
 
-        Vector2 currentPos = piece.CurrentPiecePosition;
+        Vector2 currentPos = LogicPiece.PiecePosition;
         List<Vector2> possibleAttackPositions = new List<Vector2>();
 
         Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (AttackStep * moveDir));

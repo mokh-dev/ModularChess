@@ -8,9 +8,9 @@ public abstract class PieceMoveLogic
     public abstract List<Vector2> FindMovements();
     public abstract List<Vector2> FindAttacks();
 
-    public Piece piece;
+    public Piece LogicPiece;
     
-    protected BoardState currentBoardState => BoardStateManager.Instance.BoardStates[piece.CurrentTurnCount];
+    protected BoardState currentBoardState => BoardStateManager.Instance.BoardStates[LogicPiece.TurnCount];
 
    protected bool IsInBounds(Vector2 currentPos)
     {
@@ -50,13 +50,11 @@ public abstract class PieceMoveLogic
         );
     }
 
-
-    //FIXME pawn attacking not working cause of smth here i think
     protected bool IsValidAttack(Vector2 attackPos)
     {
         if (IsInBounds(attackPos) == false) return false;
         if (currentBoardState.BoardPieces.TryGetValue(attackPos, out Piece pieceAtAttackPos) == false) return false;
-        if (pieceAtAttackPos.PieceTeam == piece.PieceTeam) return false;
+        if (pieceAtAttackPos.PieceTeam == LogicPiece.PieceTeam) return false;
 
         return true;
     }

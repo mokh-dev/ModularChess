@@ -14,34 +14,34 @@ public struct Piece
     public float PieceBaseValue;
     public float PieceOverallValue;
 
-    public List<Vector2> CurrentMovements;
-    public List<Vector2> CurrentAttacks;
+    public List<Vector2> Movements;
+    public List<Vector2> Attacks;
 
-    public Vector2 PreviousPiecePosition; 
+    public Dictionary<int, Vector2> PreviousPiecePositions; 
     
     //TODO change to list of previous positions
     // or some list of previous piece structs
-    public Vector2 CurrentPiecePosition;
+    public Vector2 PiecePosition;
 
-    public int CurrentTurnCount;
+    public int TurnCount;
 
-    public List<Vector2> GetCurrentMovements()
+    public List<Vector2> GetMovements()
     {
-        if ((CurrentMovements == null) || (CurrentMovements.Count == 0))
+        if ((Movements == null) || (Movements.Count == 0))
         {
-            logic.piece = this;
-            CurrentMovements = logic.FindMovements();
+            logic.LogicPiece = this;
+            Movements = logic.FindMovements();
         }
-        return CurrentMovements;
+        return Movements;
     }
 
-    public List<Vector2> GetCurrentAttacks()
+    public List<Vector2> GetAttacks()
     {
-        if ((CurrentAttacks == null) || (CurrentAttacks.Count == 0))
+        if ((Attacks == null) || (Attacks.Count == 0))
         {
-            logic.piece = this;
-            CurrentAttacks = logic.FindAttacks();
+            logic.LogicPiece = this;
+            Attacks = logic.FindAttacks();
         }
-        return CurrentAttacks;
+        return Attacks;
     }
 }

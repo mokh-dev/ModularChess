@@ -11,17 +11,9 @@ public class BoardStateManager : MonoBehaviour
 
     public static BoardStateManager Instance { get { return instance; } }
 
-    
-
         
     public List<BoardState> BoardStates = new List<BoardState>();
     public BoardState CurrentBoardState => BoardStates.Last();
-    // private BoardState _inBetweenBoardState;
-
-
-
-
-    
 
 
     void Awake()
@@ -69,7 +61,7 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-
+    //TODO check for king checks and add to board state
     public void PlayMove(PieceController pieceControllerToMove, Move move)
     {       
         switch (move)
@@ -96,78 +88,59 @@ public class BoardStateManager : MonoBehaviour
 
         Piece movingPiece = initialBoardState.BoardPieces[initialPostion];
 
-        BoardState updatedBoardState = UpdatePieces(initialBoardState);
-
+        Vector2 attackedPosition = new Vector2(-1,-1); // -1,-1 means no attack
 
         if (IsValidBoardAttack(initialBoardState, move) == true) 
         {
             bool isNonLandingAttack = CheckForNonLandingAttack(movingPiece, endPostion, out Vector2 attackPosition);
-            Vector2 destroyPosition = isNonLandingAttack ? attackPosition : endPostion;
+            attackedPosition = isNonLandingAttack ? attackPosition : endPostion;
 
-            updatedBoardState.BoardPieces.Remove(destroyPosition);
-            if (isSimulated == false) BoardPiecesManager.Instance.DestroyPieceObjAtPos(destroyPosition);
+            if (isSimulated == false) BoardPiecesManager.Instance.DestroyPieceObjAtPos(attackedPosition);
         }
 
-        Piece updatedPiece = UpdateMovedPiecePositions(movingPiece, endPostion, initialPostion, updatedBoardState.TurnCount);
-
-        updatedBoardState.BoardPieces.Remove(initialPostion);
-        updatedBoardState.BoardPieces.Add(endPostion, updatedPiece);
+        BoardState updatedBoardState = GenerateNewMovedBoardState(initialBoardState, move, attackedPosition);
 
         return updatedBoardState;
     }
 
-    private BoardState UpdatePieces(BoardState initialBoardState)
+    private BoardState GenerateNewMovedBoardState(BoardState initialBoardState, BoardMove move, Vector2 attackedPosition)
     {
+        Vector2 initialPosition = move.PieceMove.Item1;
+        Vector2 endPostion = move.PieceMove.Item2;
+
         BoardState updatedBoardState = new BoardState();
         
         updatedBoardState.TurnCount = initialBoardState.TurnCount + 1;
         updatedBoardState.PlayerTurn = (initialBoardState.PlayerTurn == Players.White) ? Players.Black : Players.White;
-        updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>(); //to copy as values not references
+        updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
 
         foreach (KeyValuePair<Vector2, Piece> boardPiece in initialBoardState.BoardPieces)
-        {
-            Piece updatedBoardPiece = boardPiece.Value;
-            updatedBoardPiece.CurrentTurnCount = updatedBoardState.TurnCount;
+        {   
+            if (boardPiece.Key == attackedPosition) continue;
 
-            updatedBoardState.BoardPieces.Add(boardPiece.Key, updatedBoardPiece);
+            Vector2 updatedPosition = boardPiece.Key;
+            Piece updatedBoardPiece = boardPiece.Value;
+
+            updatedBoardPiece.PreviousPiecePositions.Add(updatedBoardState.TurnCount - 1, boardPiece.Key);
+
+            if (boardPiece.Key == initialPosition)
+            {
+                updatedBoardPiece.PiecePosition = endPostion;
+                updatedPosition = endPostion;
+            }
+            
+            updatedBoardPiece.Attacks = null;
+            updatedBoardPiece.Movements = null;
+
+            updatedBoardPiece.TurnCount = updatedBoardState.TurnCount;
+
+            updatedBoardPiece.logic.LogicPiece = updatedBoardPiece;
+
+            updatedBoardState.BoardPieces.Add(updatedPosition, updatedBoardPiece);
         }
 
         return updatedBoardState;
     }
-
-    private Piece UpdateMovedPiecePositions(Piece initialPiece, Vector2 currentPosition, Vector2 previousPosition, int currentTurnCount)
-    {
-        Piece updatedPiece = initialPiece;
-
-        updatedPiece.CurrentAttacks = null;
-        updatedPiece.CurrentMovements = null;
-
-        updatedPiece.CurrentPiecePosition = currentPosition;
-        updatedPiece.PreviousPiecePosition = previousPosition;
-        updatedPiece.CurrentTurnCount = currentTurnCount;
-
-        return updatedPiece;
-    }
-
-
-    public void EndPlayerTurn()
-    {
-        BoardState updatedBoardState = CurrentBoardState;
-
-        updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
-        //updatedBoardState = InitializeBoard(updatedBoardState); // TODO change
-
-        updatedBoardState.TurnCount++;
-
-        updatedBoardState.PlayerTurn = (CurrentBoardState.PlayerTurn == Players.White) ? Players.Black : Players.White;
-        
-        //TODO check for king checks and add to board state
-
-        BoardStates.Add(updatedBoardState);
-        // _inBetweenBoardState = updatedBoardState;
-    }
-
-
 
     private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
@@ -189,8 +162,8 @@ public class BoardStateManager : MonoBehaviour
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
 
 
-        bool validAttack = movingPiece.GetCurrentAttacks().Contains(boardMove.PieceMove.Item2);
-        bool validMove = movingPiece.GetCurrentMovements().Contains(boardMove.PieceMove.Item2);
+        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
+        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
 
         if ((validAttack || validMove) == false) return false;
 
@@ -200,7 +173,7 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardAttack(BoardState boardState, BoardMove boardMove)
     {
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece attackingPiece) == false) return false;
-        if (attackingPiece.GetCurrentAttacks().Contains(boardMove.PieceMove.Item2) == false) return false;
+        if (attackingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2) == false) return false;
 
         return true;
     }
@@ -208,27 +181,11 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
     {
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-        if (movingPiece.GetCurrentMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
+        if (movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
 
         return true;
     }
-
-    
-    // private bool CheckLegalMovement(Piece piece, Vector2 endPos)
-    // {
-    //     if (piece.GetCurrentMovements().Contains(endPos)) return true;
-
-    //     return false;
-    // }
-
-    // private bool CheckLegalAttack(Piece piece, Vector2 endPos)
-    // {
-    //     if (piece.GetCurrentAttacks().Contains(endPos)) return true;
-
-    //     return false;
-    // }
-
-    
+   
 
     public bool SimulateBoardMoves(BoardState initialBoardState, List<Move> movesToSimulate, out BoardState finalBoardState)
     {
@@ -282,11 +239,11 @@ public class BoardStateManager : MonoBehaviour
 
     private Piece ReInitializeMovedPiece(Piece initialPiece, Vector2 previousPos, Vector2 currentPos)
     {
-        initialPiece.CurrentAttacks = null;
-        initialPiece.CurrentMovements = null;
+        initialPiece.Attacks = null;
+        initialPiece.Movements = null;
 
         //initialPiece.PreviousPiecePosition = previousPos;
-        initialPiece.CurrentPiecePosition = currentPos;
+        initialPiece.PiecePosition = currentPos;
 
         return initialPiece;
     }
@@ -305,7 +262,7 @@ public class BoardStateManager : MonoBehaviour
 
             foreach (KeyValuePair<Vector2, Piece> boardPiece in state.BoardPieces)
             {
-                boardPiecesOutput += boardPiece.Value.PieceTeam.ToString()+ " " + boardPiece.Value.PieceType + " at: " + boardPiece.Value.CurrentPiecePosition.ToString();
+                boardPiecesOutput += boardPiece.Value.PieceTeam.ToString()+ " " + boardPiece.Value.PieceType + " at: " + boardPiece.Value.PiecePosition.ToString();
             }
             Debug.Log("board State Num: " + i);
             Debug.Log("Turn: " + state.TurnCount.ToString() + ", ");

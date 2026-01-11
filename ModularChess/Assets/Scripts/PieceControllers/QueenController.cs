@@ -15,12 +15,12 @@ public class QueenController : PieceMoveLogic
 
     public override List<Vector2> FindMovements()
     {
-        return FindLaneMovementsInDirections(Directions, piece.CurrentPiecePosition, MovementRange);
+        return FindLaneMovementsInDirections(Directions, LogicPiece.PiecePosition, MovementRange);
     }
 
     public override List<Vector2> FindAttacks()
     {
-        return FindLaneAttacksInDirections(Directions, piece.CurrentPiecePosition, AttackRange);
+        return FindLaneAttacksInDirections(Directions, LogicPiece.PiecePosition, AttackRange);
     }
 }
 

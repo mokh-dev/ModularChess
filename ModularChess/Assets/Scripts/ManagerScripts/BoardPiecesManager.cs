@@ -60,7 +60,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         foreach (Vector2 attackPos in enemyAttackPositions)
         {
-            if (attackPos == kingPiece.CurrentPiecePosition)
+            if (attackPos == kingPiece.PiecePosition)
             {
                 return true;
             } 
@@ -77,7 +77,7 @@ public class BoardPiecesManager : MonoBehaviour
         {
             if (piece.Value.PieceTeam != team) continue;
 
-            List<Vector2> pieceAttacks = piece.Value.GetCurrentAttacks();
+            List<Vector2> pieceAttacks = piece.Value.GetAttacks();
             totalAttacks.AddRange(pieceAttacks);
         } 
 
@@ -86,8 +86,7 @@ public class BoardPiecesManager : MonoBehaviour
 
     private bool IsValidCheckDefenseMove()
     {
-        //simulates move 
-        //checks if still in check
+        //TODO simulates move checks if still in check
         return false;
     }
 
@@ -150,31 +149,6 @@ public class BoardPiecesManager : MonoBehaviour
     }
 
 
-
-    // public bool CheckLegalMove(Piece piece, Vector2 endPos)
-    // {
-    //     if (CheckLegalMovement(piece, endPos) == true) return true;
-    //     if (CheckLegalAttack(piece, endPos) == true) return true;
-
-    //     return false;
-    // }
-
-
-    // private bool CheckLegalMovement(Piece piece, Vector2 endPos)
-    // {
-    //     if (piece.GetCurrentMovements().Contains(endPos)) return true;
-
-    //     return false;
-    // }
-
-    // private bool CheckLegalAttack(Piece piece, Vector2 endPos)
-    // {
-    //     if (piece.GetCurrentAttacks().Contains(endPos)) return true;
-
-    //     return false;
-    // }
-
-
     public bool CheckForPawnEnPasant(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
         attackPosition = default;
@@ -212,7 +186,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         foreach (KeyValuePair<Vector2, Piece> piece in BoardStateManager.Instance.CurrentBoardState.BoardPieces)
         {
-            outputPieces+= ", {" + piece.Value.CurrentPiecePosition.ToString() + ": " + piece.Value.PieceType.ToString() + "}";
+            outputPieces+= ", {" + piece.Value.PiecePosition.ToString() + ": " + piece.Value.PieceType.ToString() + "}";
         }
 
         foreach (KeyValuePair<Vector2, PieceController> piece in BoardPieceObjects)

@@ -7,8 +7,6 @@ public class PieceController : MonoBehaviour
     private SpriteRenderer sr;
     public PieceTypes PieceObjType;
     public Players PieceObjTeam;
-    //public Piece piece;
-
     public Piece ControlledPiece => BoardStateManager.Instance.CurrentBoardState.BoardPieces[(Vector2)transform.position];
 
 
@@ -16,37 +14,25 @@ public class PieceController : MonoBehaviour
     {
         sr = gameObject.GetComponent<SpriteRenderer>();
         sr.sprite = BoardDataManager.Instance.GetSpriteFromPieceType(PieceObjType);
-
-        // RefreshPieceIdentity();
     }
 
     public Piece GetInitialPiece()
     {
         Piece piece = new Piece();
 
-        piece.CurrentTurnCount = 0;
+        piece.TurnCount = 0;
 
         piece.PieceType = PieceObjType;
         piece.PieceTeam = PieceObjTeam;
 
         piece.logic = (piece.logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.logic;   
         
-        piece.CurrentPiecePosition = (Vector2)transform.position;
+        piece.PiecePosition = (Vector2)transform.position;
+        piece.PreviousPiecePositions = new Dictionary<int, Vector2>();
 
         return piece;
     }
 
-
-    // private void BoardUpdated()
-    // {
-    //     ClearMoves();
-    // }
-
-    // private void ClearMoves()
-    // {
-    //     piece.CurrentMovements = new List<Vector2>();
-    //     piece.CurrentAttacks = new List<Vector2>();
-    // }
 
     public void MovePieceObj(Vector2 endPos)
     {    
@@ -69,14 +55,14 @@ public class PieceController : MonoBehaviour
     {
         BoardPiecesManager.Instance.ClearAllMarkers();
 
-        List<Vector2> possibleMoves = ControlledPiece.GetCurrentMovements();
+        List<Vector2> possibleMoves = ControlledPiece.GetMovements();
         foreach (var location in possibleMoves)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, location, Quaternion.identity);
             BoardPiecesManager.Instance.Markers.Add(newMarker);
         }
 
-        List<Vector2> possibleAttack = ControlledPiece.GetCurrentAttacks();
+        List<Vector2> possibleAttack = ControlledPiece.GetAttacks();
         foreach (var location in possibleAttack)
         {
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, location, Quaternion.identity);

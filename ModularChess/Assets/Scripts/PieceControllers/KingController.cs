@@ -11,14 +11,14 @@ public class KingController : PieceMoveLogic
 
     public override List<Vector2> FindMovements()
     {
-        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(piece.CurrentPiecePosition, MovementRange);
+        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(LogicPiece.PiecePosition, MovementRange);
 
         return ValidateMovements(possibleSquareMovements);
     }
 
     public override List<Vector2> FindAttacks()
     {
-        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(piece.CurrentPiecePosition, MovementRange);
+        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(LogicPiece.PiecePosition, MovementRange);
 
         return ValidateAttacks(possibleSquareAttacks);
     }
