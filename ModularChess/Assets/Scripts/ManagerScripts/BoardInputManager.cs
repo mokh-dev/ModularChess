@@ -50,7 +50,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool IsCorrectTeam(GameObject piece)
     {
-        if (BoardStateManager.Instance.CurrentBoardState.PlayerTurn == piece.GetComponent<PieceController>().piece.PieceTeam) return true;
+        if (BoardStateManager.Instance.CurrentBoardState.PlayerTurn == piece.GetComponent<PieceController>().ControlledPiece.PieceTeam) return true;
         return false;
     }
 

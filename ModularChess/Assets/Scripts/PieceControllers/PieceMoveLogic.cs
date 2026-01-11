@@ -51,12 +51,11 @@ public abstract class PieceMoveLogic
     }
 
 
+    //FIXME pawn attacking not working cause of smth here i think
     protected bool IsValidAttack(Vector2 attackPos)
     {
         if (IsInBounds(attackPos) == false) return false;
-
         if (currentBoardState.BoardPieces.TryGetValue(attackPos, out Piece pieceAtAttackPos) == false) return false;
-            
         if (pieceAtAttackPos.PieceTeam == piece.PieceTeam) return false;
 
         return true;

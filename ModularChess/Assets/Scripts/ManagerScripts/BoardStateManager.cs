@@ -16,6 +16,7 @@ public class BoardStateManager : MonoBehaviour
         
     public List<BoardState> BoardStates = new List<BoardState>();
     public BoardState CurrentBoardState => BoardStates.Last();
+    // private BoardState _inBetweenBoardState;
 
 
 
@@ -48,17 +49,18 @@ public class BoardStateManager : MonoBehaviour
         initialBoardState.TurnCount = 0;
 
         BoardStates.Add(initialBoardState);
+        // _inBetweenBoardState = initialBoardState;
     }
 
     private BoardState InitializeBoard(BoardState boardState)
     {
         foreach (KeyValuePair<Vector2, PieceController> pieceControllerInPos in BoardPiecesManager.Instance.BoardPieceObjects)
         {
-            Debug.Log("i");
-            boardState.BoardPieces.Add(pieceControllerInPos.Key, pieceControllerInPos.Value.piece);
+            boardState.BoardPieces.Add(pieceControllerInPos.Key, pieceControllerInPos.Value.GetInitialPiece());
         }
         return boardState;
     }
+    
 
     private void BoardUpdated()
     {
@@ -69,18 +71,12 @@ public class BoardStateManager : MonoBehaviour
 
 
     public void PlayMove(PieceController pieceControllerToMove, Move move)
-    {
-        
-        Debug.Log(move);
-        Debug.Log(move.GetType().ToString());
-        Debug.Log(move is BoardMove);
-
-        
+    {       
         switch (move)
         {
             case BoardMove boardMove:
-                Debug.Log("boardMove played");
-                MoveBoardPiece(pieceControllerToMove, boardMove);
+                BoardStates.Add(MoveBoardPiece(CurrentBoardState, boardMove, false));
+                BoardPiecesManager.Instance.MoveBoardPieceObj(pieceControllerToMove, boardMove);
                 break;
             
             case CardMove cardMove:
@@ -90,48 +86,67 @@ public class BoardStateManager : MonoBehaviour
                 break;
         }
 
-        EndPlayerTurn();
+        //EndPlayerTurn();
     }
 
-    public void MoveBoardPiece(PieceController pieceControllerToMove, BoardMove move)
+    public BoardState MoveBoardPiece(BoardState initialBoardState, BoardMove move, bool isSimulated)
     {
         Vector2 initialPostion = move.PieceMove.Item1;
         Vector2 endPostion = move.PieceMove.Item2;
 
-        if (IsValidBoardAttack(CurrentBoardState, move) == true) 
+        Piece movingPiece = initialBoardState.BoardPieces[initialPostion];
+
+        BoardState updatedBoardState = UpdatePieces(initialBoardState);
+
+
+        if (IsValidBoardAttack(initialBoardState, move) == true) 
         {
-            bool isNonLandingAttack = CheckForNonLandingAttack(pieceControllerToMove.piece, endPostion, out Vector2 attackPosition);
+            bool isNonLandingAttack = CheckForNonLandingAttack(movingPiece, endPostion, out Vector2 attackPosition);
             Vector2 destroyPosition = isNonLandingAttack ? attackPosition : endPostion;
 
-            // CurrentBoardState.BoardPieces.Remove(destroyPosition);
-            BoardPiecesManager.Instance.DestroyPieceObjAtPos(destroyPosition);
+            updatedBoardState.BoardPieces.Remove(destroyPosition);
+            if (isSimulated == false) BoardPiecesManager.Instance.DestroyPieceObjAtPos(destroyPosition);
         }
 
-        Debug.Log("lst");
+        Piece updatedPiece = UpdateMovedPiecePositions(movingPiece, endPostion, initialPostion, updatedBoardState.TurnCount);
 
-        // foreach (KeyValuePair<Vector2, Piece> posPiece in _inBetweenBoardState.BoardPieces)
-        // {
-        //     Debug.Log(posPiece.Value.CurrentPiecePosition.ToString() + posPiece.Value.PieceTeam.ToString() + posPiece.Value.PieceType.ToString());
-        // }
+        updatedBoardState.BoardPieces.Remove(initialPostion);
+        updatedBoardState.BoardPieces.Add(endPostion, updatedPiece);
 
-        // _inBetweenBoardState.BoardPieces.Remove(initialPostion);
-        // _inBetweenBoardState.BoardPieces.Add(endPostion, movingPiece);
+        return updatedBoardState;
+    }
 
-        // _inBetweenBoardState.BoardPieces[endPostion]
+    private BoardState UpdatePieces(BoardState initialBoardState)
+    {
+        BoardState updatedBoardState = new BoardState();
+        
+        updatedBoardState.TurnCount = initialBoardState.TurnCount + 1;
+        updatedBoardState.PlayerTurn = (initialBoardState.PlayerTurn == Players.White) ? Players.Black : Players.White;
+        updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>(); //to copy as values not references
 
-        // foreach (KeyValuePair<Vector2, Piece> posPiece in _inBetweenBoardState.BoardPieces)
-        // {
-        //     Debug.Log(posPiece.Value.CurrentPiecePosition.ToString() + posPiece.Value.PieceTeam.ToString() + posPiece.Value.PieceType.ToString());
-        // }
+        foreach (KeyValuePair<Vector2, Piece> boardPiece in initialBoardState.BoardPieces)
+        {
+            Piece updatedBoardPiece = boardPiece.Value;
+            updatedBoardPiece.CurrentTurnCount = updatedBoardState.TurnCount;
 
-        // Debug.Log(initialPostion);
-        // Debug.Log(endPostion);
-        // Debug.Log(_inBetweenBoardState.BoardPieces[endPostion]);
-        // Debug.Log(_inBetweenBoardState.BoardPieces[initialPostion]);
+            updatedBoardState.BoardPieces.Add(boardPiece.Key, updatedBoardPiece);
+        }
 
+        return updatedBoardState;
+    }
 
-        Debug.Log("MOve Board place obj played");
-        BoardPiecesManager.Instance.MoveBoardPieceObj(pieceControllerToMove, move);
+    private Piece UpdateMovedPiecePositions(Piece initialPiece, Vector2 currentPosition, Vector2 previousPosition, int currentTurnCount)
+    {
+        Piece updatedPiece = initialPiece;
+
+        updatedPiece.CurrentAttacks = null;
+        updatedPiece.CurrentMovements = null;
+
+        updatedPiece.CurrentPiecePosition = currentPosition;
+        updatedPiece.PreviousPiecePosition = previousPosition;
+        updatedPiece.CurrentTurnCount = currentTurnCount;
+
+        return updatedPiece;
     }
 
 
@@ -140,7 +155,7 @@ public class BoardStateManager : MonoBehaviour
         BoardState updatedBoardState = CurrentBoardState;
 
         updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
-        updatedBoardState = InitializeBoard(updatedBoardState);
+        //updatedBoardState = InitializeBoard(updatedBoardState); // TODO change
 
         updatedBoardState.TurnCount++;
 
@@ -171,35 +186,13 @@ public class BoardStateManager : MonoBehaviour
 
     public bool IsValidBoardMove(BoardState boardState, BoardMove boardMove)
     {
-        Debug.Log("valid check");
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-        Debug.Log("valid check 1 pass");
 
 
         bool validAttack = movingPiece.GetCurrentAttacks().Contains(boardMove.PieceMove.Item2);
         bool validMove = movingPiece.GetCurrentMovements().Contains(boardMove.PieceMove.Item2);
 
-
-        Debug.Log(movingPiece);
-        Debug.Log(movingPiece.PieceTeam);
-        Debug.Log(movingPiece.CurrentPiecePosition);
-
-        foreach (Vector2 item in movingPiece.GetCurrentAttacks())
-        {
-            Debug.Log(item);
-        }
-
-        foreach (Vector2 item in movingPiece.GetCurrentMovements())
-        {
-            Debug.Log(item);
-        }
-        Debug.Log(boardMove.PieceMove.Item2);
-        Debug.Log((validAttack || validMove));
-        Debug.Log((validAttack || validMove) == false);
-
-
         if ((validAttack || validMove) == false) return false;
-        Debug.Log("valid check 2 pass");
 
         return true;
     }

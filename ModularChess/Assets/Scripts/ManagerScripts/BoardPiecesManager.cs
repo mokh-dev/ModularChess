@@ -115,7 +115,7 @@ public class BoardPiecesManager : MonoBehaviour
         AddNewPieceObj(_testPieceType, _testPiecePos, _testPieceTeam);
     }
 
-
+    // FIXME adds to CurrentBoardState which doesnt work
     public void AddNewPieceObj(PieceTypes type, Vector2 pos, Players team) 
     {
         GameObject newPieceObj = Instantiate(BoardDataManager.Instance.BasePiecePre, pos, Quaternion.identity);
@@ -128,7 +128,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         newPieceController.InitializePieceObj();
 
-        BoardStateManager.Instance.CurrentBoardState.BoardPieces.Add(pos, newPieceController.piece);
+        BoardStateManager.Instance.CurrentBoardState.BoardPieces.Add(pos, newPieceController.GetInitialPiece());
     }
 
     
@@ -136,7 +136,7 @@ public class BoardPiecesManager : MonoBehaviour
     {
         Vector2 endPostion = move.PieceMove.Item2;
 
-        BoardPieceObjects.Remove(pieceControllerToMove.piece.CurrentPiecePosition);
+        BoardPieceObjects.Remove((Vector2)pieceControllerToMove.transform.position);
 
         pieceControllerToMove.MovePieceObj(endPostion);
 
