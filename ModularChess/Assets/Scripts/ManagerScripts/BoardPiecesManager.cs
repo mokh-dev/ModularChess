@@ -68,6 +68,22 @@ public class BoardPiecesManager : MonoBehaviour
 
         return false;
     }
+    
+    private bool TryFindKingOfTeam(BoardState boardState, Players kingTeam, out Piece kingPiece)
+    {
+        kingPiece = default;
+
+        foreach (KeyValuePair<Vector2, Piece> boardPosPiece in boardState.BoardPieces)
+        {
+            if (boardPosPiece.Value.PieceType != PieceTypes.King) continue;
+            if (boardPosPiece.Value.PieceTeam != kingTeam) continue;
+
+            kingPiece = boardPosPiece.Value;
+            return true;
+        }
+
+        return false;
+    }
 
     private List<Vector2> GetAllAttacksFromTeam(BoardState boardState, Players team)
     {
@@ -91,21 +107,6 @@ public class BoardPiecesManager : MonoBehaviour
     }
 
 
-    private bool TryFindKingOfTeam(BoardState boardState, Players kingTeam, out Piece kingPiece)
-    {
-        kingPiece = default;
-
-        foreach (KeyValuePair<Vector2, Piece> boardPosPiece in boardState.BoardPieces)
-        {
-            if (boardPosPiece.Value.PieceType != PieceTypes.King) continue;
-            if (boardPosPiece.Value.PieceTeam != kingTeam) continue;
-
-            kingPiece = boardPosPiece.Value;
-            return true;
-        }
-
-        return false;
-    }
 
 
 
@@ -131,11 +132,14 @@ public class BoardPiecesManager : MonoBehaviour
     }
 
     
-    public void MoveBoardPieceObj(PieceController pieceControllerToMove, BoardMove move)
+    public void MoveBoardPieceObj(BoardMove move)
     {
+        Vector2 initialPosition = move.PieceMove.Item1;
         Vector2 endPostion = move.PieceMove.Item2;
 
-        BoardPieceObjects.Remove((Vector2)pieceControllerToMove.transform.position);
+        PieceController pieceControllerToMove = BoardPieceObjects[initialPosition];
+
+        BoardPieceObjects.Remove(initialPosition);
 
         pieceControllerToMove.MovePieceObj(endPostion);
 
@@ -148,6 +152,16 @@ public class BoardPiecesManager : MonoBehaviour
         BoardPieceObjects.Remove(pos);
     }
 
+    
+    public void RebuildBoardState(BoardState boardState)
+    {
+        //TODO rebuild board state
+        //pieceController MovePieceObj becomes unneccesary 
+        //and is simulated goes away
+        //along with the connected BoardPieceManager functions
+    }
+
+
 
     public bool CheckForPawnEnPasant(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
@@ -155,7 +169,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         if (pieceToCheck.PieceType != PieceTypes.Pawn) return false;
 
-        PawnController pawnController = (PawnController)pieceToCheck.logic;
+        PawnController pawnController = (PawnController)pieceToCheck.Logic;
         if (pawnController.EnPasantEnemyMovementAttackPositions.Count == 0) return false;
         
         if (pawnController.EnPasantEnemyMovementAttackPositions.TryGetValue(endPos, out Vector2 possibleAttackPosition) == false) return false;
@@ -166,6 +180,7 @@ public class BoardPiecesManager : MonoBehaviour
         return true;
     }
 
+    
 
     public void ClearAllMarkers()
     {

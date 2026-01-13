@@ -15,6 +15,8 @@ public class BoardStateManager : MonoBehaviour
     public List<BoardState> BoardStates = new List<BoardState>();
     public BoardState CurrentBoardState => BoardStates.Last();
 
+    public Dictionary<int, BoardState> SimulatedBoardStates = new Dictionary<int, BoardState>();
+
 
     void Awake()
     {
@@ -41,7 +43,6 @@ public class BoardStateManager : MonoBehaviour
         initialBoardState.TurnCount = 0;
 
         BoardStates.Add(initialBoardState);
-        // _inBetweenBoardState = initialBoardState;
     }
 
     private BoardState InitializeBoard(BoardState boardState)
@@ -54,48 +55,30 @@ public class BoardStateManager : MonoBehaviour
     }
     
 
-    private void BoardUpdated()
+    private void PlayBoardMove(BoardState playedBoardState, BoardMove boardMove, Vector2? attackedPosition)
     {
-        // WhiteInCheck = BoardPiecesManager.Instance.IsInCheck(Players.White);
-        // BlackInCheck = BoardPiecesManager.Instance.IsInCheck(Players.Black);
-    }
+        BoardStates.Add(playedBoardState);
 
-
-    //TODO check for king checks and add to board state
-    public void PlayMove(PieceController pieceControllerToMove, Move move)
-    {       
-        switch (move)
+        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
+        if (attackedPosition != null)
         {
-            case BoardMove boardMove:
-                BoardStates.Add(MoveBoardPiece(CurrentBoardState, boardMove, false));
-                BoardPiecesManager.Instance.MoveBoardPieceObj(pieceControllerToMove, boardMove);
-                break;
-            
-            case CardMove cardMove:
-                break;
-
-            default:
-                break;
+            BoardPiecesManager.Instance.DestroyPieceObjAtPos((Vector2)attackedPosition);
         }
-
-        //EndPlayerTurn();
     }
 
-    public BoardState MoveBoardPiece(BoardState initialBoardState, BoardMove move, bool isSimulated)
+    private BoardState GetMovedBoardState(BoardState initialBoardState, BoardMove move, out Vector2? attackedPosition)
     {
         Vector2 initialPostion = move.PieceMove.Item1;
         Vector2 endPostion = move.PieceMove.Item2;
 
         Piece movingPiece = initialBoardState.BoardPieces[initialPostion];
 
-        Vector2 attackedPosition = new Vector2(-1,-1); // -1,-1 means no attack
+        attackedPosition = null;
 
         if (IsValidBoardAttack(initialBoardState, move) == true) 
         {
             bool isNonLandingAttack = CheckForNonLandingAttack(movingPiece, endPostion, out Vector2 attackPosition);
             attackedPosition = isNonLandingAttack ? attackPosition : endPostion;
-
-            if (isSimulated == false) BoardPiecesManager.Instance.DestroyPieceObjAtPos(attackedPosition);
         }
 
         BoardState updatedBoardState = GenerateNewMovedBoardState(initialBoardState, move, attackedPosition);
@@ -103,7 +86,7 @@ public class BoardStateManager : MonoBehaviour
         return updatedBoardState;
     }
 
-    private BoardState GenerateNewMovedBoardState(BoardState initialBoardState, BoardMove move, Vector2 attackedPosition)
+    private BoardState GenerateNewMovedBoardState(BoardState initialBoardState, BoardMove move, Vector2? attackedPosition)
     {
         Vector2 initialPosition = move.PieceMove.Item1;
         Vector2 endPostion = move.PieceMove.Item2;
@@ -121,6 +104,7 @@ public class BoardStateManager : MonoBehaviour
             Vector2 updatedPosition = boardPiece.Key;
             Piece updatedBoardPiece = boardPiece.Value;
 
+            updatedBoardPiece.PreviousPiecePositions = new Dictionary<int, Vector2>();
             updatedBoardPiece.PreviousPiecePositions.Add(updatedBoardState.TurnCount - 1, boardPiece.Key);
 
             if (boardPiece.Key == initialPosition)
@@ -134,7 +118,7 @@ public class BoardStateManager : MonoBehaviour
 
             updatedBoardPiece.TurnCount = updatedBoardState.TurnCount;
 
-            updatedBoardPiece.logic.LogicPiece = updatedBoardPiece;
+            updatedBoardPiece.Logic.LogicPiece = updatedBoardPiece;
 
             updatedBoardState.BoardPieces.Add(updatedPosition, updatedBoardPiece);
         }
@@ -142,6 +126,59 @@ public class BoardStateManager : MonoBehaviour
         return updatedBoardState;
     }
 
+
+    public bool TryPlayBoardMove(BoardState initialBoardState, BoardMove boardMove)
+    {
+        if (initialBoardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
+
+        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
+        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
+
+        if ((validAttack || validMove) == false) return false;
+
+
+        if (SimulatedMoveHasCheck(initialBoardState, boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition) == false) return false;
+
+        PlayBoardMove(simulatedBoardState, boardMove, attackedPosition);
+        return true;
+    }
+
+    private bool SimulatedMoveHasCheck(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
+    {
+        BoardState movedBoardState = GetMovedBoardState(initialBoardState, boardMove, out Vector2? attackedPos);
+        SimulatedBoardStates[movedBoardState.TurnCount] = movedBoardState;
+
+        bool initialPlayerInCheck = BoardPiecesManager.Instance.IsInCheck(movedBoardState, initialBoardState.PlayerTurn);
+        bool oppositePlayerInCheck = BoardPiecesManager.Instance.IsInCheck(movedBoardState, movedBoardState.PlayerTurn);
+
+
+
+        if (initialPlayerInCheck == true)
+        {
+            //illegal move
+            attackedPosition = null;
+            simulatedBoardState = default;
+            return false;
+        }
+
+        if (oppositePlayerInCheck == true)
+        {
+            if (movedBoardState.PlayerTurn == Players.White)
+            {
+                movedBoardState.WhiteInCheck = true;
+            }
+            else if (movedBoardState.PlayerTurn == Players.Black)
+            {
+                movedBoardState.BlackInCheck = true;
+            }
+        }
+
+        attackedPosition = attackedPos;
+        simulatedBoardState = movedBoardState;
+        return true;
+    }
+
+    
     private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
         attackPosition = default;
@@ -155,102 +192,12 @@ public class BoardStateManager : MonoBehaviour
         return false;
     }
 
-
-
-    public bool IsValidBoardMove(BoardState boardState, BoardMove boardMove)
-    {
-        if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-
-
-        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
-        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
-
-        if ((validAttack || validMove) == false) return false;
-
-        return true;
-    }
-
-    public bool IsValidBoardAttack(BoardState boardState, BoardMove boardMove)
+    private bool IsValidBoardAttack(BoardState boardState, BoardMove boardMove)
     {
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece attackingPiece) == false) return false;
         if (attackingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2) == false) return false;
 
         return true;
-    }
-
-    public bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
-    {
-        if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-        if (movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
-
-        return true;
-    }
-   
-
-    public bool SimulateBoardMoves(BoardState initialBoardState, List<Move> movesToSimulate, out BoardState finalBoardState)
-    {
-        finalBoardState = new BoardState();
-        BoardState simulatedBoardState = initialBoardState;
-
-
-        foreach (Move move in movesToSimulate)
-        {
-            switch (move)
-            {
-                case BoardMove boardMove:
-                    if (IsValidBoardMove(simulatedBoardState, boardMove) == false) return false;
-
-                    simulatedBoardState = PlaySimulatedBoardMove(simulatedBoardState, boardMove.PieceMove);
-                    break;
-                
-                case CardMove cardMove:
-                    //no cards yet
-                    break;
-                
-                default:
-                    continue;
-            }
-        }
-
-        finalBoardState = simulatedBoardState;
-        return true;
-    }
-
-
-    private BoardState PlaySimulatedBoardMove(BoardState boardState, (Vector2, Vector2) boardMove)
-    {
-        boardState.BoardPieces.TryGetValue(boardMove.Item1, out Piece movingPiece);
-
-        if (boardState.BoardPieces.TryGetValue(boardMove.Item2, out Piece attackedPiece) == true)
-        {
-            boardState.BoardPieces.Remove(boardMove.Item2);
-        }   
-
-        Piece updatedPiece = ReInitializeMovedPiece(movingPiece, boardMove.Item1, boardMove.Item2);
-
-        boardState.BoardPieces.Add(boardMove.Item2, updatedPiece);
-        boardState.BoardPieces.Remove(boardMove.Item1);
-
-        boardState.PlayerTurn = (boardState.PlayerTurn == Players.White) ? Players.Black : Players.White;
-        boardState.TurnCount++;
-
-        return boardState;     
-    }
-
-    private Piece ReInitializeMovedPiece(Piece initialPiece, Vector2 previousPos, Vector2 currentPos)
-    {
-        initialPiece.Attacks = null;
-        initialPiece.Movements = null;
-
-        //initialPiece.PreviousPiecePosition = previousPos;
-        initialPiece.PiecePosition = currentPos;
-
-        return initialPiece;
-    }
-
-    public void RebuildBoardState(int boardStateIndex)
-    {
-        //TODO rebuild board state from index
     }
 
     public void PrintBoardStates()
@@ -266,13 +213,14 @@ public class BoardStateManager : MonoBehaviour
             }
             Debug.Log("board State Num: " + i);
             Debug.Log("Turn: " + state.TurnCount.ToString() + ", ");
+            Debug.Log("White In Check: " + state.WhiteInCheck.ToString());
+            Debug.Log("Black In Check: " + state.BlackInCheck.ToString());
             Debug.Log("Board Pieces: " + boardPiecesOutput);
             Debug.Log("-------------------");
 
             i++;
         }
     }
-
 
 }
 
@@ -286,7 +234,6 @@ public struct BoardState
 
     public bool WhiteInCheck;
     public bool BlackInCheck;
-
 }
 
 public enum Players

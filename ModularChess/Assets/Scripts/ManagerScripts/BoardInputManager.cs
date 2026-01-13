@@ -37,17 +37,6 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         BoardPiecesManager.Instance.ClearAllMarkers();
     }
 
-    private void PlayMove(Vector2 endPos)
-    {
-        BoardMove boardMove = new BoardMove();
-        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, endPos);
-
-        //TODO turn this from a function call to a unity event
-        BoardStateManager.Instance.PlayMove(_selectedPiece.GetComponent<PieceController>(), boardMove);
-
-        UnselectPiece();
-    }
-
     private bool IsCorrectTeam(GameObject piece)
     {
         if (BoardStateManager.Instance.CurrentBoardState.PlayerTurn == piece.GetComponent<PieceController>().ControlledPiece.PieceTeam) return true;
@@ -71,12 +60,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (_selectedPiece == null) return;
 
-        if (IsValidMove(mouseDownPos) == true)
-        {
-            PlayMove(mouseDownPos);
-            return;
-        }
-
+        SendTryBoardMove(mouseDownPos);
         UnselectPiece();
     }
         
@@ -88,26 +72,17 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         if (mouseUpPos == mouseDownPos) return;
 
-        BoardMove boardMove = new BoardMove();
-        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, mouseDownPos);
-
-        if (IsValidMove(mouseUpPos) == false)
-        {
-            UnselectPiece();
-            return;
-        }
-
-        PlayMove(mouseUpPos);
-        
+        SendTryBoardMove(mouseUpPos);
+        UnselectPiece();
     }
 
-    private bool IsValidMove(Vector2 endPos)
+    private bool SendTryBoardMove(Vector2 endPos)
     {
         BoardMove boardMove = new BoardMove();
         boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, endPos);
         
-        if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove) == true) return true;
+        if (BoardStateManager.Instance.TryPlayBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove) == false) return false;
 
-        return false;
+        return true;
     }
 }

@@ -38,11 +38,11 @@ public class PawnController : PieceMoveLogic
 
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
-        if (currentBoardState.BoardPieces.TryGetValue(positionToCheck, out Piece pieceInPosition) == false) return false;
+        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(positionToCheck, out Piece pieceInPosition) == false) return false;
         if (pieceInPosition.PieceTeam == LogicPiece.PieceTeam) return false;
         if (pieceInPosition.PieceType != PieceTypes.Pawn) return false; 
 
-        if (((PawnController)pieceInPosition.logic).CanBeEnPasanted() == false) return false;
+        if (((PawnController)pieceInPosition.Logic).CanBeEnPasanted() == false) return false;
 
         return true;
     }

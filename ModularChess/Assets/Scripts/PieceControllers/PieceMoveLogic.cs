@@ -9,8 +9,8 @@ public abstract class PieceMoveLogic
     public abstract List<Vector2> FindAttacks();
 
     public Piece LogicPiece;
+
     
-    protected BoardState currentBoardState => BoardStateManager.Instance.BoardStates[LogicPiece.TurnCount];
 
    protected bool IsInBounds(Vector2 currentPos)
     {
@@ -25,7 +25,7 @@ public abstract class PieceMoveLogic
     protected bool IsEmptyAtPos(Vector2 endPos)
     {  
         if (IsInBounds(endPos) == false) return false;
-        if (currentBoardState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
+        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
        
         return true;
     }
@@ -53,7 +53,7 @@ public abstract class PieceMoveLogic
     protected bool IsValidAttack(Vector2 attackPos)
     {
         if (IsInBounds(attackPos) == false) return false;
-        if (currentBoardState.BoardPieces.TryGetValue(attackPos, out Piece pieceAtAttackPos) == false) return false;
+        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(attackPos, out Piece pieceAtAttackPos) == false) return false;
         if (pieceAtAttackPos.PieceTeam == LogicPiece.PieceTeam) return false;
 
         return true;

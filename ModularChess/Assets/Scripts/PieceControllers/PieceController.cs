@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -25,10 +26,12 @@ public class PieceController : MonoBehaviour
         piece.PieceType = PieceObjType;
         piece.PieceTeam = PieceObjTeam;
 
-        piece.logic = (piece.logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.logic;   
-        
+        piece.Logic = (piece.Logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.Logic;   
+
         piece.PiecePosition = (Vector2)transform.position;
         piece.PreviousPiecePositions = new Dictionary<int, Vector2>();
+
+        piece.Logic.LogicPiece = piece;
 
         return piece;
     }
@@ -51,6 +54,7 @@ public class PieceController : MonoBehaviour
     }
 
     //TODO move to board manager
+    //and only spawn valid move markers
     public void SpawnMarkers() 
     {
         BoardPiecesManager.Instance.ClearAllMarkers();
