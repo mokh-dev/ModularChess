@@ -126,26 +126,17 @@ public class BoardStateManager : MonoBehaviour
         return updatedBoardState;
     }
 
-
     public bool TryPlayBoardMove(BoardState initialBoardState, BoardMove boardMove)
     {
-        if (initialBoardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-
-        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
-        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
-
-        if ((validAttack || validMove) == false) return false;
-
-
-        if (SimulatedMoveHasCheck(initialBoardState, boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition) == false) return false;
-
+        if (IsValidBoardMove(initialBoardState, boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition) == false) return false;
         PlayBoardMove(simulatedBoardState, boardMove, attackedPosition);
+        
         return true;
     }
 
-    private bool SimulatedMoveHasCheck(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
+    public bool SimulatedMoveHasCheck(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
     {
-        BoardState movedBoardState = GetMovedBoardState(initialBoardState, boardMove, out Vector2? attackedPos);
+        BoardState movedBoardState = GetMovedBoardState(initialBoardState, boardMove, out attackedPosition);
         SimulatedBoardStates[movedBoardState.TurnCount] = movedBoardState;
 
         bool initialPlayerInCheck = BoardPiecesManager.Instance.IsInCheck(movedBoardState, initialBoardState.PlayerTurn);
@@ -173,7 +164,6 @@ public class BoardStateManager : MonoBehaviour
             }
         }
 
-        attackedPosition = attackedPos;
         simulatedBoardState = movedBoardState;
         return true;
     }
@@ -181,21 +171,45 @@ public class BoardStateManager : MonoBehaviour
     
     private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
-        attackPosition = default;
-
-        if (BoardPiecesManager.Instance.CheckForPawnEnPasant(pieceToCheck, endPos, out Vector2 pawnAttackPosition) == true)
+        if (BoardPiecesManager.Instance.CheckForPawnEnPasant(pieceToCheck, endPos, out attackPosition) == true)
         {
-            attackPosition = pawnAttackPosition;
             return true;
         }
 
+        attackPosition = default;
         return false;
+    }
+
+    public bool IsValidBoardMove(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
+    {
+        attackedPosition = null;
+        simulatedBoardState = default;
+
+        if (initialBoardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
+
+        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
+        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
+
+        if ((validAttack || validMove) == false) return false;
+
+
+        if (SimulatedMoveHasCheck(initialBoardState, boardMove, out simulatedBoardState, out attackedPosition) == false) return false;
+
+        return true;
     }
 
     private bool IsValidBoardAttack(BoardState boardState, BoardMove boardMove)
     {
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece attackingPiece) == false) return false;
         if (attackingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2) == false) return false;
+
+        return true;
+    }
+
+    public bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
+    {
+        if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
+        if (movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
 
         return true;
     }

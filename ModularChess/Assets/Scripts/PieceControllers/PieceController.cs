@@ -52,25 +52,4 @@ public class PieceController : MonoBehaviour
     
         gameObject.name = ControlledPiece.PieceTeam.ToString()+ " " + ControlledPiece.PieceType + " at: (" + ((int)transform.position.x).ToString() + "," + ((int)transform.position.y).ToString() + ")";
     }
-
-    //TODO move to board manager
-    //and only spawn valid move markers
-    public void SpawnMarkers() 
-    {
-        BoardPiecesManager.Instance.ClearAllMarkers();
-
-        List<Vector2> possibleMoves = ControlledPiece.GetMovements();
-        foreach (var location in possibleMoves)
-        {
-            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, location, Quaternion.identity);
-            BoardPiecesManager.Instance.Markers.Add(newMarker);
-        }
-
-        List<Vector2> possibleAttack = ControlledPiece.GetAttacks();
-        foreach (var location in possibleAttack)
-        {
-            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, location, Quaternion.identity);
-            BoardPiecesManager.Instance.Markers.Add(newMarker);
-        }
-    }
 }

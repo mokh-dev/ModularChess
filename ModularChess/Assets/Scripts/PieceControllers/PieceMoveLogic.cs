@@ -10,9 +10,8 @@ public abstract class PieceMoveLogic
 
     public Piece LogicPiece;
 
-    
 
-   protected bool IsInBounds(Vector2 currentPos)
+    protected bool IsInBounds(Vector2 currentPos)
     {
         if (currentPos.x > 7) return false;
         if (currentPos.x < 0) return false;
@@ -50,10 +49,10 @@ public abstract class PieceMoveLogic
         );
     }
 
-    protected bool IsValidAttack(Vector2 attackPos)
+    protected bool IsValidAttack(Vector2 possibleAttackPos)
     {
-        if (IsInBounds(attackPos) == false) return false;
-        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(attackPos, out Piece pieceAtAttackPos) == false) return false;
+        if (IsInBounds(possibleAttackPos) == false) return false;
+        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
         if (pieceAtAttackPos.PieceTeam == LogicPiece.PieceTeam) return false;
 
         return true;
@@ -75,7 +74,7 @@ public abstract class PieceMoveLogic
     {
         if (IsInBounds(possibleMovementPos) == false) return false;
         if (IsEmptyAtPos(possibleMovementPos) == false) return false;
-
+        
         return true;
     }
     protected List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)

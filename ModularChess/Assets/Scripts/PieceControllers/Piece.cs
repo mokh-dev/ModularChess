@@ -9,7 +9,7 @@ public struct Piece
     
     public PieceTypes PieceType;
 
-    public Players PieceTeam; // change to just team
+    public Players PieceTeam;
     public PieceMoveLogic Logic;
     public float PieceBaseValue;
     public float PieceOverallValue;
@@ -18,9 +18,6 @@ public struct Piece
     public List<Vector2> Attacks;
 
     public Dictionary<int, Vector2> PreviousPiecePositions; 
-    
-    //TODO change to list of previous positions
-    // or some list of previous piece structs
     public Vector2 PiecePosition;
 
     public int TurnCount;

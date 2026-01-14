@@ -28,7 +28,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         if (IsCorrectTeam(pieceToSelect) == false) return;
 
         _selectedPiece = pieceToSelect;
-        _selectedPiece.GetComponent<PieceController>().SpawnMarkers();
+        BoardPiecesManager.Instance.SpawnMarkersForPieceObj(pieceToSelect.GetComponent<PieceController>());
     }
 
     private void UnselectPiece()

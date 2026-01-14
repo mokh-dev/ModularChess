@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7788071125103008197, guid: f21dd41fbfe3a8c4f8befd7d2fb15c64, type: 3}
+      propertyPath: m_SortingOrder
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8569823276319914242, guid: f21dd41fbfe3a8c4f8befd7d2fb15c64, type: 3}
       propertyPath: m_Name
       value: AttackMarker

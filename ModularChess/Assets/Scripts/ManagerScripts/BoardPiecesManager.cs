@@ -100,15 +100,6 @@ public class BoardPiecesManager : MonoBehaviour
         return totalAttacks;
     }
 
-    private bool IsValidCheckDefenseMove()
-    {
-        //TODO simulates move checks if still in check
-        return false;
-    }
-
-
-
-
 
     public void AddTestPiece()
     {
@@ -179,6 +170,49 @@ public class BoardPiecesManager : MonoBehaviour
 
         return true;
     }
+
+
+    public void SpawnMarkersForPieceObj(PieceController selectedPieceController)
+    {
+        ClearAllMarkers();
+        SpawnMovementMarkers(selectedPieceController);
+        SpawnAttackMarkers(selectedPieceController);
+    }
+
+    private void SpawnMovementMarkers(PieceController selectedPieceController)
+    {
+        List<Vector2> possibleMovements = selectedPieceController.ControlledPiece.GetMovements();
+        foreach (Vector2 possibleMovementPosition in possibleMovements)
+        {
+            if (IsValidCurrentMove(selectedPieceController.ControlledPiece.PiecePosition, possibleMovementPosition) == false) continue;
+
+            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, possibleMovementPosition, Quaternion.identity);
+            Markers.Add(newMarker);
+        }
+    }
+
+    private void SpawnAttackMarkers(PieceController selectedPieceController)
+    {
+        List<Vector2> possibleAttacks = selectedPieceController.ControlledPiece.GetAttacks();
+        foreach (Vector2 possibleAttackPosition in possibleAttacks)
+        {
+            if (IsValidCurrentMove(selectedPieceController.ControlledPiece.PiecePosition, possibleAttackPosition) == false) continue;
+
+            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, possibleAttackPosition, Quaternion.identity);
+            Markers.Add(newMarker);
+        }
+    }
+
+    private bool IsValidCurrentMove(Vector2 initialMovePos, Vector2 endMovePos)
+    {
+        BoardMove boardMove = new BoardMove();
+        boardMove.PieceMove = (initialMovePos, endMovePos);
+
+        if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove, out BoardState _, out Vector2? __) == false) return false;
+
+        return true;
+    }
+
 
     
 
