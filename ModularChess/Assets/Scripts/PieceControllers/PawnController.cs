@@ -28,6 +28,16 @@ public class PawnController : PieceMoveLogic
         
         Vector2 previousPosition = LogicPiece.PreviousPiecePositions[LogicPiece.TurnCount - 1];
 
+        // Debug.Log("checking piece:");
+        // Debug.Log(LogicPiece.PieceTeam);
+        // Debug.Log(LogicPiece.PieceType);
+        // Debug.Log(LogicPiece.PiecePosition);
+        // Debug.Log("LogicPiece.TurnCount: " + LogicPiece.TurnCount.ToString());
+        // foreach (KeyValuePair<int, Vector2> pos in LogicPiece.PreviousPiecePositions)
+        // {
+        //     Debug.Log(pos.Key.ToString() + ": " + pos.Value.ToString());
+        
+        // }
         if (previousPosition.y != homeRow) return false;
 
         Vector2 homeRowStepPos = new Vector2(previousPosition.x, previousPosition.y + (HomeRowStep * moveDir));
@@ -39,10 +49,19 @@ public class PawnController : PieceMoveLogic
     private bool CheckCanEnPasant(Vector2 positionToCheck)
     {
         if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(positionToCheck, out Piece pieceInPosition) == false) return false;
+
         if (pieceInPosition.PieceTeam == LogicPiece.PieceTeam) return false;
+
         if (pieceInPosition.PieceType != PieceTypes.Pawn) return false; 
+        // Debug.Log("check 4");
+        // Debug.Log(LogicPiece.PieceTeam);
+        // Debug.Log(LogicPiece.PieceType);
+        // Debug.Log(LogicPiece.PiecePosition);
+        // Debug.Log("LogicPiece.TurnCount: " + LogicPiece.TurnCount.ToString());
+
 
         if (((PawnController)pieceInPosition.Logic).CanBeEnPasanted() == false) return false;
+        Debug.Log("check true");
 
         return true;
     }
@@ -96,11 +115,13 @@ public class PawnController : PieceMoveLogic
 
         if (CheckCanEnPasant(rightEnPasantPos) == true)
         {
+            Debug.Log("can en pasant to the right");
             EnPasantEnemyMovementAttackPositions.Add(rightPos, rightEnPasantPos); 
             validNormalAttacks.Add(rightPos);
         }
         if (CheckCanEnPasant(leftEnPasantPos) == true)
         {
+            Debug.Log("can en pasant to the left");
             EnPasantEnemyMovementAttackPositions.Add(leftPos, leftEnPasantPos); 
             validNormalAttacks.Add(leftPos);
         }

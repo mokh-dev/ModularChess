@@ -175,8 +175,8 @@ public class BoardPiecesManager : MonoBehaviour
     public void SpawnMarkersForPieceObj(PieceController selectedPieceController)
     {
         ClearAllMarkers();
-        SpawnMovementMarkers(selectedPieceController);
         SpawnAttackMarkers(selectedPieceController);
+        SpawnMovementMarkers(selectedPieceController);
     }
 
     private void SpawnMovementMarkers(PieceController selectedPieceController)
@@ -193,9 +193,16 @@ public class BoardPiecesManager : MonoBehaviour
 
     private void SpawnAttackMarkers(PieceController selectedPieceController)
     {
+        Debug.Log(selectedPieceController.ControlledPiece.PieceTeam);
+        Debug.Log(selectedPieceController.ControlledPiece.PieceType);
+        Debug.Log(selectedPieceController.ControlledPiece.PiecePosition);
+        Debug.Log("selectedPieceController.ControlledPiece.TurnCount: " + selectedPieceController.ControlledPiece.TurnCount.ToString());
         List<Vector2> possibleAttacks = selectedPieceController.ControlledPiece.GetAttacks();
+        Debug.Log("possibleAttacks.Count: " + possibleAttacks.Count.ToString());
+
         foreach (Vector2 possibleAttackPosition in possibleAttacks)
         {
+            Debug.Log("checking attack on " + possibleAttackPosition.ToString());
             if (IsValidCurrentMove(selectedPieceController.ControlledPiece.PiecePosition, possibleAttackPosition) == false) continue;
 
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, possibleAttackPosition, Quaternion.identity);
@@ -208,6 +215,7 @@ public class BoardPiecesManager : MonoBehaviour
         BoardMove boardMove = new BoardMove();
         boardMove.PieceMove = (initialMovePos, endMovePos);
 
+        Debug.Log("Valid turn count: " + BoardStateManager.Instance.CurrentBoardState.TurnCount.ToString());
         if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove, out BoardState _, out Vector2? __) == false) return false;
 
         return true;

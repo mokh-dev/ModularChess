@@ -59,11 +59,12 @@ public class BoardStateManager : MonoBehaviour
     {
         BoardStates.Add(playedBoardState);
 
-        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
         if (attackedPosition != null)
         {
             BoardPiecesManager.Instance.DestroyPieceObjAtPos((Vector2)attackedPosition);
         }
+        
+        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
     }
 
     private BoardState GetMovedBoardState(BoardState initialBoardState, BoardMove move, out Vector2? attackedPosition)
@@ -104,9 +105,6 @@ public class BoardStateManager : MonoBehaviour
             Vector2 updatedPosition = boardPiece.Key;
             Piece updatedBoardPiece = boardPiece.Value;
 
-            updatedBoardPiece.PreviousPiecePositions = new Dictionary<int, Vector2>();
-            updatedBoardPiece.PreviousPiecePositions.Add(updatedBoardState.TurnCount - 1, boardPiece.Key);
-
             if (boardPiece.Key == initialPosition)
             {
                 updatedBoardPiece.PiecePosition = endPostion;
@@ -117,6 +115,10 @@ public class BoardStateManager : MonoBehaviour
             updatedBoardPiece.Movements = null;
 
             updatedBoardPiece.TurnCount = updatedBoardState.TurnCount;
+
+            updatedBoardPiece.PreviousPiecePositions[updatedBoardState.TurnCount - 1]  = boardPiece.Key;
+
+
 
             updatedBoardPiece.Logic.LogicPiece = updatedBoardPiece;
 
@@ -137,7 +139,32 @@ public class BoardStateManager : MonoBehaviour
     public bool SimulatedMoveHasCheck(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
     {
         BoardState movedBoardState = GetMovedBoardState(initialBoardState, boardMove, out attackedPosition);
+        if (SimulatedBoardStates.TryGetValue(movedBoardState.TurnCount, out BoardState simul) == true)
+        {
+            Debug.Log("simul exists beforehand");
+            foreach (KeyValuePair<Vector2, Piece> posPiece in SimulatedBoardStates[movedBoardState.TurnCount].BoardPieces)
+            {
+                Debug.Log(posPiece.Value.PieceTeam);
+                Debug.Log(posPiece.Value.PieceType);
+                Debug.Log(posPiece.Value.PiecePosition);
+                Debug.Log("posPiece.Value.TurnCount: " + posPiece.Value.TurnCount.ToString());
+            }
+
+            SimulatedBoardStates.Remove(movedBoardState.TurnCount);
+        } 
         SimulatedBoardStates[movedBoardState.TurnCount] = movedBoardState;
+        if (SimulatedBoardStates.TryGetValue(movedBoardState.TurnCount, out BoardState simul2) == true)
+        {
+            Debug.Log("simul exists after");
+            foreach (KeyValuePair<Vector2, Piece> posPiece in SimulatedBoardStates[movedBoardState.TurnCount].BoardPieces)
+            {
+                Debug.Log(posPiece.Value.PieceTeam);
+                Debug.Log(posPiece.Value.PieceType);
+                Debug.Log(posPiece.Value.PiecePosition);
+                Debug.Log("posPiece.Value.TurnCount: " + posPiece.Value.TurnCount.ToString());
+            }
+        } 
+
 
         bool initialPlayerInCheck = BoardPiecesManager.Instance.IsInCheck(movedBoardState, initialBoardState.PlayerTurn);
         bool oppositePlayerInCheck = BoardPiecesManager.Instance.IsInCheck(movedBoardState, movedBoardState.PlayerTurn);
@@ -206,7 +233,7 @@ public class BoardStateManager : MonoBehaviour
         return true;
     }
 
-    public bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
+    private bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
     {
         if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
         if (movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
