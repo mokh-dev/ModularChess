@@ -20,25 +20,11 @@ public struct Piece
     public Dictionary<int, Vector2> PreviousPiecePositions; 
     public Vector2 PiecePosition;
 
-    public int TurnCount;
+    public int BoardTurnCount;
 
-    public BoardState UsedBoardState
-    {
-        get
-        {
-            if (IsRealState()) return BoardStateManager.Instance.BoardStates[TurnCount];
-            
-            if (BoardStateManager.Instance.SimulatedBoardStates.TryGetValue(TurnCount, out BoardState simulatedState) == true) return simulatedState;
-            
-            throw new Exception("Piece: " + this.ToString() + " tried using non-existant Board State");
-        }
+    public BoardState UsedBoardState => BoardStateManager.Instance.BoardStates[BoardTurnCount];
 
-    }
 
-    private bool IsRealState()
-    {
-        return (TurnCount >= 0) && (TurnCount < BoardStateManager.Instance.BoardStates.Count);
-    }
 
     public List<Vector2> GetMovements()
     {

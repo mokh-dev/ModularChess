@@ -154,24 +154,6 @@ public class BoardPiecesManager : MonoBehaviour
 
 
 
-    public bool CheckForPawnEnPasant(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
-    {
-        attackPosition = default;
-
-        if (pieceToCheck.PieceType != PieceTypes.Pawn) return false;
-
-        PawnController pawnController = (PawnController)pieceToCheck.Logic;
-        if (pawnController.EnPasantEnemyMovementAttackPositions.Count == 0) return false;
-        
-        if (pawnController.EnPasantEnemyMovementAttackPositions.TryGetValue(endPos, out Vector2 possibleAttackPosition) == false) return false;
-
-        attackPosition = possibleAttackPosition;
-        pawnController.ClearEnPasantDict();
-
-        return true;
-    }
-
-
     public void SpawnMarkersForPieceObj(PieceController selectedPieceController)
     {
         ClearAllMarkers();
@@ -196,7 +178,7 @@ public class BoardPiecesManager : MonoBehaviour
         Debug.Log(selectedPieceController.ControlledPiece.PieceTeam);
         Debug.Log(selectedPieceController.ControlledPiece.PieceType);
         Debug.Log(selectedPieceController.ControlledPiece.PiecePosition);
-        Debug.Log("selectedPieceController.ControlledPiece.TurnCount: " + selectedPieceController.ControlledPiece.TurnCount.ToString());
+        Debug.Log("selectedPieceController.ControlledPiece.TurnCount: " + selectedPieceController.ControlledPiece.BoardTurnCount.ToString());
         List<Vector2> possibleAttacks = selectedPieceController.ControlledPiece.GetAttacks();
         Debug.Log("possibleAttacks.Count: " + possibleAttacks.Count.ToString());
 
@@ -215,7 +197,7 @@ public class BoardPiecesManager : MonoBehaviour
         BoardMove boardMove = new BoardMove();
         boardMove.PieceMove = (initialMovePos, endMovePos);
 
-        Debug.Log("Valid turn count: " + BoardStateManager.Instance.CurrentBoardState.TurnCount.ToString());
+        Debug.Log("Valid turn count: " + BoardStateManager.Instance.CurrentBoardState.BoardTurnCount.ToString());
         if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove, out BoardState _, out Vector2? __) == false) return false;
 
         return true;

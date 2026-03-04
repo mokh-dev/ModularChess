@@ -21,7 +21,7 @@ public class PieceController : MonoBehaviour
     {
         Piece piece = new Piece();
 
-        piece.TurnCount = 0;
+        piece.BoardTurnCount = 0;
 
         piece.PieceType = PieceObjType;
         piece.PieceTeam = PieceObjTeam;

@@ -56,6 +56,18 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 904179075512932255, guid: f16cd35039f7c87488477c3ea92b49ed, type: 3}
+    - target: {fileID: 5378284155373566842, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5378284155373566842, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5378284155373566842, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
       propertyPath: m_Name
       value: Bishop
