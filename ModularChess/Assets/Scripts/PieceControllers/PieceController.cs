@@ -19,12 +19,13 @@ public class PieceController : MonoBehaviour
 
     public Piece GetInitialPiece()
     {
-        Piece piece = new Piece();
+        Piece piece = new Piece
+        {
+            BoardTurnCount = 0,
 
-        piece.BoardTurnCount = 0;
-
-        piece.PieceType = PieceObjType;
-        piece.PieceTeam = PieceObjTeam;
+            PieceType = PieceObjType,
+            PieceTeam = PieceObjTeam
+        };
 
         piece.Logic = (piece.Logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.Logic;   
 

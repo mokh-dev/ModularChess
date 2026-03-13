@@ -35,6 +35,7 @@ public class BoardStateManager : MonoBehaviour
         StartGame();
     }
 
+
     private void StartGame()
     {
         BoardState initialBoardState = new BoardState();
@@ -56,24 +57,19 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-    public void EndPlayerTurn() //UI Button
-    {
-        PlayerTurn = (PlayerTurn == Players.White) ? Players.Black : Players.White;
-        _turnIndicatior.color = (PlayerTurn == Players.White) ? Color.black : Color.white;
-    }
-    
 
-    private void PlayBoardMove(BoardState playedBoardState, BoardMove boardMove, Vector2? attackedPosition)
+    public bool TryPlayBoardMove(BoardState initialBoardState, BoardMove boardMove)
     {
-        BoardStates.Add(playedBoardState);
+        if (IsValidBoardMove(initialBoardState, boardMove) == false) return false;
 
-        if (attackedPosition != null)
-        {
-            BoardPiecesManager.Instance.DestroyPieceObjAtPos((Vector2)attackedPosition);
-        }
+        BoardState movedState = GetMovedBoardState(initialBoardState, boardMove, out Vector2? attackedPosition);
+        PlayBoardMove(movedState, boardMove, attackedPosition);
         
-        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
+        return true;
     }
+
+
+
 
     private BoardState GetMovedBoardState(BoardState initialBoardState, BoardMove move, out Vector2? attackedPosition)
     {
@@ -134,14 +130,24 @@ public class BoardStateManager : MonoBehaviour
         return updatedBoardState;
     }
 
-    public bool TryPlayBoardMove(BoardState initialBoardState, BoardMove boardMove)
+    private void PlayBoardMove(BoardState playedBoardState, BoardMove boardMove, Vector2? attackedPosition)
     {
-        if (IsValidBoardMove(initialBoardState, boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition) == false) return false;
-        PlayBoardMove(simulatedBoardState, boardMove, attackedPosition);
+        BoardStates.Add(playedBoardState);
+
+        if (attackedPosition != null)
+        {
+            BoardPiecesManager.Instance.DestroyPieceObjAtPos((Vector2)attackedPosition);
+        }
         
-        return true;
+        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
     }
 
+
+    public void EndPlayerTurn() //UI Button
+    {
+        PlayerTurn = (PlayerTurn == Players.White) ? Players.Black : Players.White;
+        _turnIndicatior.color = (PlayerTurn == Players.White) ? Color.white : Color.black;
+    }
 
     private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
@@ -153,11 +159,8 @@ public class BoardStateManager : MonoBehaviour
     }
 
     //TODO redundant validity checks
-    public bool IsValidBoardMove(BoardState initialBoardState, BoardMove boardMove, out BoardState simulatedBoardState, out Vector2? attackedPosition)
+    public bool IsValidBoardMove(BoardState initialBoardState, BoardMove boardMove)
     {
-        attackedPosition = null;
-        simulatedBoardState = default;
-
         if (initialBoardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
 
         bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
