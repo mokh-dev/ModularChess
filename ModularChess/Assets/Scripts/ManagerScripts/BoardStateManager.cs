@@ -220,6 +220,7 @@ public struct BoardState
 
 public enum Players
 {
+    //TODO change all occurrences to Player and Enemy
     White,
     Black,
 }
