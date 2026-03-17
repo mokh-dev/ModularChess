@@ -4,8 +4,11 @@ using UnityEngine;
 public class Card : ScriptableObject
 {
     public string Name;
-    public Sprite Art;
     public CardType Type;
+    public Sprite Art;
+    public Sprite Frame;
+    public int Cost;
+    public string Description;
 }
 
 public enum CardType
