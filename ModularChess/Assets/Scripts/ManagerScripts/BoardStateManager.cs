@@ -9,16 +9,14 @@ using UnityEngine.UI;
 public class BoardStateManager : MonoBehaviour
 {
     private static BoardStateManager instance;
-
     public static BoardStateManager Instance { get { return instance; } }
 
         
     public List<BoardState> BoardStates = new List<BoardState>();
     public BoardState CurrentBoardState => BoardStates.Last();
 
-    public Players PlayerTurn;
 
-    [SerializeField] private RawImage _turnIndicatior;
+    
 
     void Awake()
     {
@@ -143,11 +141,7 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-    public void EndPlayerTurn() //UI Button
-    {
-        PlayerTurn = (PlayerTurn == Players.White) ? Players.Black : Players.White;
-        _turnIndicatior.color = (PlayerTurn == Players.White) ? Color.white : Color.black;
-    }
+
 
     private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
     {
@@ -187,7 +181,7 @@ public class BoardStateManager : MonoBehaviour
         return true;
     }
 
-    public void PrintBoardStates()
+    public void PrintBoardStates() //Editor Inspector Button
     {
         int i = 0;
         foreach (BoardState state in BoardStates)
@@ -213,8 +207,9 @@ public class BoardStateManager : MonoBehaviour
 public struct BoardState
 {
     public Dictionary<Vector2, Piece> BoardPieces;
-    // anything related to the board
-    // like maybe a tile with
+
+    // a list of positions that store the ground info
+    // (to tell that at position [3,4] theres a wall or if its non existant)
     public int BoardTurnCount;
 }
 

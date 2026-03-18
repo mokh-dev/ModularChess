@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3cadf06e2de1d66468e72b92e5c37847, type: 3}
-  m_Name: OtherKingCard
+  m_Name: CowardlyBishopCard
   m_EditorClassIdentifier: Assembly-CSharp::Card
-  Title: Other King
+  Title: Cowardly Bishop
   Type: 1
   Art: {fileID: 21300000, guid: 2fa648ea5ddcbf5439400d91e99a77c6, type: 3}
   Frame: {fileID: 21300000, guid: 5969030b6c5a45844b6da3e566e20679, type: 3}
-  Cost: 2
+  Cost: 1
   Description: Spawn Other

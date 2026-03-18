@@ -4,24 +4,9 @@ using UnityEngine.EventSystems;
 public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
 
-    private static BoardInputManager _instance;
-
-    public static BoardInputManager Instance { get { return _instance; } }
-
     [SerializeField] private GameObject _selectedPiece;
     private Vector2 mouseDownPos;
     private Vector2 mouseUpPos;
-
-
-    private void Awake()
-    {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            _instance = this;
-        }
-    }
 
     private void SelectPiece(GameObject pieceToSelect)
     {
@@ -39,7 +24,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool IsCorrectTeam(GameObject piece)
     {
-        if (BoardStateManager.Instance.PlayerTurn == piece.GetComponent<PieceController>().ControlledPiece.PieceTeam) return true;
+        if (GameStateManager.Instance.CurrentPlayerTurn == piece.GetComponent<PieceController>().ControlledPiece.PieceTeam) return true;
         return false;
     }
 
