@@ -59,6 +59,7 @@ public class TableStateManager : MonoBehaviour
     private void UpdateTableState(TableState updatedTableState)
     {
         TableStates.Add(updatedTableState);
+        TableCardManager.Instance.DisplayState(CurrentTableState);
     }
 
     public void DrawCardFromDeck()
@@ -119,22 +120,21 @@ public class TableStateManager : MonoBehaviour
             i++;
         }
     }
+}
 
-    public struct TableState
-    {
-        public TableSide PlayerSide;
-        public TableSide EnemySide;
+public struct TableState
+{
+    public TableSide PlayerSide;
+    public TableSide EnemySide;
 
-        public List<Card> DiscardPile;
-    }
+    public List<Card> DiscardPile;
+}
 
 
 
-    public struct TableSide
-    {
-        public List<Card> Hand;
-        public List<Card> Field;
-        public List<Card> Deck;
-    }
-
+public struct TableSide
+{
+    public List<Card> Hand;
+    public List<Card> Field;
+    public List<Card> Deck;
 }
