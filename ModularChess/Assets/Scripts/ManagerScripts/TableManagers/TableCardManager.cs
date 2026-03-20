@@ -12,7 +12,7 @@ public class TableCardManager : MonoBehaviour
     [SerializeField] private GameObject _playerFieldGroup;
     [SerializeField] private GameObject _enemyHandGroup;
     [SerializeField] private GameObject _enemyFieldGroup;
-    [SerializeField] private Transform _discardPileCenterPosition;
+    [SerializeField] private Transform _discardPilePosition;
 
 
 
@@ -46,7 +46,7 @@ public class TableCardManager : MonoBehaviour
     {
         foreach (Transform child in parentObj.transform)
         {
-            Destroy(child);
+            Destroy(child.gameObject);
         }
     }
 
@@ -54,10 +54,9 @@ public class TableCardManager : MonoBehaviour
     {
         foreach (Card card in cards)
         {
-            GameObject newCard = Instantiate(_emptyCard);
+            GameObject newCard = Instantiate(_emptyCard, parentObj.transform);
             
             newCard.GetComponent<CardBuilder>().CardData = card;
-            newCard.transform.SetParent(parentObj.transform);
         }
     }
 

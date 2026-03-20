@@ -93,6 +93,41 @@ public class TableStateManager : MonoBehaviour
     }
 
 
+    public void PlayCharacterCardToField(Card characterCard)
+    {
+        if (IsCardInHand(characterCard) == false) return;
+
+        List<Card> updatedHand = new List<Card>(CurrentTableState.PlayerSide.Hand);
+        updatedHand.Remove(characterCard);
+        
+        List<Card> updatedField = new List<Card>(CurrentTableState.PlayerSide.Field);
+        updatedField.Add(characterCard);
+
+        TableSide updatedPlayerSide = new TableSide
+        {
+            Hand = updatedHand,
+            Field = updatedField,
+
+            Deck = CurrentTableState.PlayerSide.Deck
+        };
+
+        TableState updatedTableState = new TableState
+        {
+            PlayerSide = updatedPlayerSide,
+            EnemySide = CurrentTableState.EnemySide,
+
+            DiscardPile = CurrentTableState.DiscardPile
+        };
+
+        UpdateTableState(updatedTableState);
+    }
+
+    private bool IsCardInHand(Card card)
+    {
+        if (CurrentTableState.PlayerSide.Hand.Contains(card)) return true;
+        return false;
+    }
+
     public void PrintTableStates() //Editor Inspector Button
     {
         int i = 0;

@@ -14,8 +14,13 @@ public class CardBuilder : MonoBehaviour
     [SerializeField] private Image _mainArtImage;
     [SerializeField] private Image _frameImage;
 
+    private Button cardButton;
+
     void Start()
     {
+        cardButton = gameObject.GetComponent<Button>();
+        cardButton.onClick.AddListener(ClickedCard);
+
         if (CardData != null)
         {
             _titleText.text = CardData.Title;
@@ -28,5 +33,9 @@ public class CardBuilder : MonoBehaviour
         }
     }
 
-
+    private void ClickedCard()
+    {
+        TableInputManager.Instance.OnClickCard(CardData);
+    }
+    
 }
