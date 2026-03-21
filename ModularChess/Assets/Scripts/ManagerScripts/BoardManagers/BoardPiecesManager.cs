@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using System.Linq;
 
 public class BoardPiecesManager : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class BoardPiecesManager : MonoBehaviour
     public UnityEvent ResetLastMove;
 
     
+    private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
 
 
     [Header("---Test---")]
@@ -42,69 +44,29 @@ public class BoardPiecesManager : MonoBehaviour
 
     private void LoadBoardObjectsToDict()
     {
-        foreach (var gameObjectTransform in BoardPiecesParent.GetComponentsInChildren<Transform>())
+        foreach (Transform gameObjectTransform in BoardPiecesParent.transform)
         {
-            if (gameObjectTransform == BoardPiecesParent.transform) continue;
+            if (gameObjectTransform == BoardPiecesParent.transform) continue; //TODO check if this is needed
 
             gameObjectTransform.gameObject.GetComponent<PieceController>().InitializePieceObj();
             BoardPieceObjects.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject.GetComponent<PieceController>());
         }  
     }
 
-    public bool IsInCheck(BoardState boardState, Players teamToCheck)
+
+    public void DisplayBoardState(BoardState updatedBoardState)
     {
-        if (TryFindKingOfTeam(boardState, teamToCheck, out Piece kingPiece) == false) return false;
-
-        Players enemyTeam = (teamToCheck == Players.White) ? Players.Black : Players.White;
-        List<Vector2> enemyAttackPositions = GetAllAttacksFromTeam(boardState, enemyTeam);
-
-        foreach (Vector2 attackPos in enemyAttackPositions)
-        {
-            if (attackPos == kingPiece.PiecePosition)
-            {
-                return true;
-            } 
-        }
-
-        return false;
-    }
-    
-    private bool TryFindKingOfTeam(BoardState boardState, Players kingTeam, out Piece kingPiece)
-    {
-        kingPiece = default;
-
-        foreach (KeyValuePair<Vector2, Piece> boardPosPiece in boardState.BoardPieces)
-        {
-            if (boardPosPiece.Value.PieceType != PieceTypes.King) continue;
-            if (boardPosPiece.Value.PieceTeam != kingTeam) continue;
-
-            kingPiece = boardPosPiece.Value;
-            return true;
-        }
-
-        return false;
+        
     }
 
-    private List<Vector2> GetAllAttacksFromTeam(BoardState boardState, Players team)
-    {
-        List<Vector2> totalAttacks = new List<Vector2>();
 
-        foreach (KeyValuePair<Vector2, Piece> piece in boardState.BoardPieces)
-        {
-            if (piece.Value.PieceTeam != team) continue;
-
-            List<Vector2> pieceAttacks = piece.Value.GetAttacks();
-            totalAttacks.AddRange(pieceAttacks);
-        } 
-
-        return totalAttacks;
-    }
 
 
     public void AddTestPiece()
     {
         AddNewPieceObj(_testPieceType, _testPiecePos, _testPieceTeam);
     }
+
 
     // FIXME adds to CurrentBoardState which doesnt work
     public void AddNewPieceObj(PieceTypes type, Vector2 pos, Players team) 
@@ -119,14 +81,14 @@ public class BoardPiecesManager : MonoBehaviour
 
         newPieceController.InitializePieceObj();
 
-        BoardStateManager.Instance.CurrentBoardState.BoardPieces.Add(pos, newPieceController.GetInitialPiece());
+        //currentBoardState.BoardPieces.Add(pos, newPieceController.GetInitialPiece());
     }
 
     
-    public void MoveBoardPieceObj(BoardMove move)
+    public void MoveBoardPieceObj((Vector2, Vector2) boardMove)
     {
-        Vector2 initialPosition = move.PieceMove.Item1;
-        Vector2 endPostion = move.PieceMove.Item2;
+        Vector2 initialPosition = boardMove.Item1;
+        Vector2 endPostion = boardMove.Item2;
 
         PieceController pieceControllerToMove = BoardPieceObjects[initialPosition];
 
@@ -142,16 +104,6 @@ public class BoardPiecesManager : MonoBehaviour
         Destroy(BoardPieceObjects[pos].gameObject);
         BoardPieceObjects.Remove(pos);
     }
-
-    
-    public void RebuildBoardState(BoardState boardState)
-    {
-        //TODO rebuild board state
-        //pieceController MovePieceObj becomes unneccesary 
-        //and is simulated goes away
-        //along with the connected BoardPieceManager functions
-    }
-
 
 
     public void SpawnMarkersForPieceObj(PieceController selectedPieceController)
@@ -179,7 +131,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         foreach (Vector2 possibleAttackPosition in possibleAttacks)
         {
-            if (IsValidCurrentMove(selectedPieceController.ControlledPiece.PiecePosition, possibleAttackPosition) == false) continue;
+            if (IsValidCurrentAttack(selectedPieceController.ControlledPiece.PiecePosition, possibleAttackPosition) == false) continue;
 
             GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, possibleAttackPosition, Quaternion.identity);
             Markers.Add(newMarker);
@@ -188,10 +140,18 @@ public class BoardPiecesManager : MonoBehaviour
 
     private bool IsValidCurrentMove(Vector2 initialMovePos, Vector2 endMovePos)
     {
-        BoardMove boardMove = new BoardMove();
-        boardMove.PieceMove = (initialMovePos, endMovePos);
+        (Vector2, Vector2) boardMove = (initialMovePos, endMovePos);
 
-        if (BoardStateManager.Instance.IsValidBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove) == false) return false;
+        if (BoardStateManager.Instance.IsValidBoardMove(boardMove) == false) return false;
+
+        return true;
+    }
+
+    private bool IsValidCurrentAttack(Vector2 initialMovePos, Vector2 endMovePos)
+    {
+        (Vector2, Vector2) boardAttack = (initialMovePos, endMovePos);
+
+        if (BoardStateManager.Instance.IsValidBoardAttack(boardAttack) == false) return false;
 
         return true;
     }
@@ -216,7 +176,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         
 
-        foreach (KeyValuePair<Vector2, Piece> piece in BoardStateManager.Instance.CurrentBoardState.BoardPieces)
+        foreach (KeyValuePair<Vector2, Piece> piece in currentBoardState.BoardPieces)
         {
             outputPieces+= ", {" + piece.Value.PiecePosition.ToString() + ": " + piece.Value.PieceType.ToString() + "}";
         }

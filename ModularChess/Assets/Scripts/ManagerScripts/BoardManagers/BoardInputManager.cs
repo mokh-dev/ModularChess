@@ -63,10 +63,29 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool SendTryBoardMove(Vector2 endPos)
     {
-        BoardMove boardMove = new BoardMove();
-        boardMove.PieceMove = ((Vector2)_selectedPiece.transform.position, endPos);
+        (Vector2, Vector2) boardMove = ((Vector2)_selectedPiece.transform.position, endPos);
         
-        if (BoardStateManager.Instance.TryPlayBoardMove(BoardStateManager.Instance.CurrentBoardState, boardMove) == false) return false;
+        if (BoardStateManager.Instance.TryPlayBoardMove(boardMove) == false) return false;
+
+        return true;
+    }
+
+
+    private bool SendTryBoardAttack(Vector2 endPos)
+    {
+        (Vector2, Vector2) boardAttack = ((Vector2)_selectedPiece.transform.position, endPos);
+        
+        //if (BoardStateManager.Instance.TryPlayBoardAttack(boardAttack) == false) return false;
+
+        return true;
+    }
+
+    //TODO add SendTryBoardCapture in input
+    private bool SendTryBoardCapture(Vector2 endPos)
+    {
+        (Vector2, Vector2) boardCapture = ((Vector2)_selectedPiece.transform.position, endPos);
+        
+        //if (BoardStateManager.Instance.TryPlayBoardCapture(boardCapture) == false) return false;
 
         return true;
     }

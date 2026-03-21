@@ -11,10 +11,7 @@ public class BoardStateManager : MonoBehaviour
     private static BoardStateManager instance;
     public static BoardStateManager Instance { get { return instance; } }
 
-        
-    public List<BoardState> BoardStates = new List<BoardState>();
-    public BoardState CurrentBoardState => BoardStates.Last();
-
+    private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
 
     
 
@@ -28,40 +25,31 @@ public class BoardStateManager : MonoBehaviour
         }
     }
 
-    void Start()
+
+    //TODO move to GameStateManager along with table initialize
+    // private void StartGame()
+    // {
+    //     BoardState initialBoardState = new BoardState();
+    //     initialBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
+    //     initialBoardState = InitializeBoard(initialBoardState);
+
+    //     UpdateBoardState(initialBoardState);
+    // }
+
+
+    private void UpdateBoardState(BoardState updatedBoardState)
     {
-        StartGame();
+        GameStateManager.Instance.UpdateBoardGameState(updatedBoardState);
+        BoardPiecesManager.Instance.DisplayBoardState(updatedBoardState);
     }
 
 
-    private void StartGame()
+    public bool TryPlayBoardMove((Vector2, Vector2) boardMove)
     {
-        BoardState initialBoardState = new BoardState();
-        initialBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
-        initialBoardState = InitializeBoard(initialBoardState);
+        if (IsValidBoardMove(boardMove) == false) return false;
 
-        initialBoardState.BoardTurnCount = 0;
-
-        BoardStates.Add(initialBoardState);
-    }
-
-    private BoardState InitializeBoard(BoardState boardState)
-    {
-        foreach (KeyValuePair<Vector2, PieceController> pieceControllerInPos in BoardPiecesManager.Instance.BoardPieceObjects)
-        {
-            boardState.BoardPieces.Add(pieceControllerInPos.Key, pieceControllerInPos.Value.GetInitialPiece());
-        }
-        return boardState;
-    }
-
-
-
-    public bool TryPlayBoardMove(BoardState initialBoardState, BoardMove boardMove)
-    {
-        if (IsValidBoardMove(initialBoardState, boardMove) == false) return false;
-
-        BoardState movedState = GetMovedBoardState(initialBoardState, boardMove, out Vector2? attackedPosition);
-        PlayBoardMove(movedState, boardMove, attackedPosition);
+        BoardState movedBoardState = GetMovedBoardState(currentBoardState, boardMove);
+        UpdateBoardState(movedBoardState);
         
         return true;
     }
@@ -69,40 +57,18 @@ public class BoardStateManager : MonoBehaviour
 
 
 
-    private BoardState GetMovedBoardState(BoardState initialBoardState, BoardMove move, out Vector2? attackedPosition)
+    private BoardState GetMovedBoardState(BoardState initialBoardState, (Vector2, Vector2) boardMove)
     {
-        Vector2 initialPostion = move.PieceMove.Item1;
-        Vector2 endPostion = move.PieceMove.Item2;
+        Vector2 initialPosition = boardMove.Item1;
+        Vector2 endPostion = boardMove.Item2;
 
-        Piece movingPiece = initialBoardState.BoardPieces[initialPostion];
-
-        attackedPosition = null;
-
-        if (IsValidBoardAttack(initialBoardState, move) == true) 
+        BoardState updatedBoardState = new BoardState
         {
-            bool isNonLandingAttack = CheckForNonLandingAttack(movingPiece, endPostion, out Vector2 attackPosition);
-            attackedPosition = isNonLandingAttack ? attackPosition : endPostion;
-        }
-
-        BoardState updatedBoardState = GenerateNewMovedBoardState(initialBoardState, move, attackedPosition);
-
-        return updatedBoardState;
-    }
-
-    private BoardState GenerateNewMovedBoardState(BoardState initialBoardState, BoardMove move, Vector2? attackedPosition)
-    {
-        Vector2 initialPosition = move.PieceMove.Item1;
-        Vector2 endPostion = move.PieceMove.Item2;
-
-        BoardState updatedBoardState = new BoardState();
-        
-        updatedBoardState.BoardTurnCount = initialBoardState.BoardTurnCount + 1;
-        updatedBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
+            BoardPieces = new Dictionary<Vector2, Piece>()
+        };
 
         foreach (KeyValuePair<Vector2, Piece> boardPiece in initialBoardState.BoardPieces)
         {   
-            if (boardPiece.Key == attackedPosition) continue;
-
             Vector2 updatedPosition = boardPiece.Key;
             Piece updatedBoardPiece = boardPiece.Value;
 
@@ -115,9 +81,7 @@ public class BoardStateManager : MonoBehaviour
             updatedBoardPiece.Attacks = null;
             updatedBoardPiece.Movements = null;
 
-            updatedBoardPiece.BoardTurnCount = updatedBoardState.BoardTurnCount;
-
-            updatedBoardPiece.PreviousPiecePositions[updatedBoardState.BoardTurnCount - 1]  = boardPiece.Key;
+            updatedBoardPiece.PreviousPiecePositions.Add(boardPiece.Key);
 
 
             updatedBoardPiece.Logic.LogicPiece = updatedBoardPiece;
@@ -128,118 +92,22 @@ public class BoardStateManager : MonoBehaviour
         return updatedBoardState;
     }
 
-    private void PlayBoardMove(BoardState playedBoardState, BoardMove boardMove, Vector2? attackedPosition)
+    public bool IsValidBoardAttack((Vector2, Vector2) boardAttack)
     {
-        BoardStates.Add(playedBoardState);
-
-        if (attackedPosition != null)
-        {
-            BoardPiecesManager.Instance.DestroyPieceObjAtPos((Vector2)attackedPosition);
-        }
-        
-        BoardPiecesManager.Instance.MoveBoardPieceObj(boardMove);
-    }
-
-
-
-
-    private bool CheckForNonLandingAttack(Piece pieceToCheck, Vector2 endPos, out Vector2 attackPosition)
-    {
-        //TODO non moving attacks
-
-
-        attackPosition = default;
-        return false;
-    }
-
-    //TODO redundant validity checks
-    public bool IsValidBoardMove(BoardState initialBoardState, BoardMove boardMove)
-    {
-        if (initialBoardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-
-        bool validAttack = movingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2);
-        bool validMove = movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2);
-
-        if ((validAttack || validMove) == false) return false;
+        if (currentBoardState.BoardPieces.TryGetValue(boardAttack.Item1, out Piece attackingPiece) == false) return false;
+        if (attackingPiece.GetAttacks().Contains(boardAttack.Item2) == false) return false;
 
         return true;
     }
 
-    private bool IsValidBoardAttack(BoardState boardState, BoardMove boardMove)
+    public bool IsValidBoardMove((Vector2, Vector2) boardMove)
     {
-        if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece attackingPiece) == false) return false;
-        if (attackingPiece.GetAttacks().Contains(boardMove.PieceMove.Item2) == false) return false;
+        if (currentBoardState.BoardPieces.TryGetValue(boardMove.Item1, out Piece movingPiece) == false) return false;
+        if (movingPiece.GetMovements().Contains(boardMove.Item2) == false) return false;
 
         return true;
     }
-
-    private bool IsValidBoardMovement(BoardState boardState, BoardMove boardMove)
-    {
-        if (boardState.BoardPieces.TryGetValue(boardMove.PieceMove.Item1, out Piece movingPiece) == false) return false;
-        if (movingPiece.GetMovements().Contains(boardMove.PieceMove.Item2) == false) return false;
-
-        return true;
-    }
-
-    public void PrintBoardStates() //Editor Inspector Button
-    {
-        int i = 0;
-        foreach (BoardState state in BoardStates)
-        {
-            string boardPiecesOutput = "";
-
-            foreach (KeyValuePair<Vector2, Piece> boardPiece in state.BoardPieces)
-            {
-                boardPiecesOutput += boardPiece.Value.PieceTeam.ToString()+ " " + boardPiece.Value.PieceType + " at: " + boardPiece.Value.PiecePosition.ToString();
-            }
-            Debug.Log("board State Num: " + i);
-            Debug.Log("Turn: " + state.BoardTurnCount.ToString() + ", ");
-            Debug.Log("Board Pieces: " + boardPiecesOutput);
-            Debug.Log("-------------------");
-
-            i++;
-        }
-    }
-
 }
 
 
-public struct BoardState
-{
-    public Dictionary<Vector2, Piece> BoardPieces;
-
-    // a list of positions that store the ground info
-    // (to tell that at position [3,4] theres a wall or if its non existant)
-    public int BoardTurnCount;
-}
-
-public enum Players
-{
-    //TODO change all occurrences to Player and Enemy
-    White,
-    Black,
-}
-
-public enum PieceTypes
-{
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King,
-}
-
-
-public abstract class Move{} 
-
-public class BoardMove : Move
-{
-    public (Vector2, Vector2) PieceMove;
-}
-
-public class CardMove : Move
-{
-    public int CardIdToPlay;
-}
 

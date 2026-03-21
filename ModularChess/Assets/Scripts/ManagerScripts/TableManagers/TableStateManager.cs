@@ -8,13 +8,10 @@ public class TableStateManager : MonoBehaviour
     private static TableStateManager instance;
     public static TableStateManager Instance { get { return instance; } }
 
-    public List<TableState> TableStates = new List<TableState>();
-    public TableState CurrentTableState => TableStates.Last();
-
     [SerializeField] private List<Card> _startingPlayerDeck;
     [SerializeField] private List<Card> _startingEnemyDeck;
 
-
+    private TableState CurrentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
 
     void Awake()
     {
@@ -31,6 +28,11 @@ public class TableStateManager : MonoBehaviour
         InitializeTable();
     }
 
+    private void UpdateTableState(TableState updatedTableState)
+    {
+        GameStateManager.Instance.UpdateTableGameState(updatedTableState);
+        TableCardManager.Instance.DisplayTableState(updatedTableState);
+    }
 
     private void InitializeTable()
     {
@@ -42,7 +44,7 @@ public class TableStateManager : MonoBehaviour
             DiscardPile = new List<Card>()
         };
 
-        TableStates.Add(initialTableState);
+        UpdateTableState(initialTableState);
     }
 
     private TableSide GetInitialTableSide(List<Card> startingDeck)
@@ -56,11 +58,7 @@ public class TableStateManager : MonoBehaviour
         };
     }
 
-    private void UpdateTableState(TableState updatedTableState)
-    {
-        TableStates.Add(updatedTableState);
-        TableCardManager.Instance.DisplayState(CurrentTableState);
-    }
+
 
     public void DrawCardFromDeck()
     {
@@ -127,49 +125,4 @@ public class TableStateManager : MonoBehaviour
         if (CurrentTableState.PlayerSide.Hand.Contains(card)) return true;
         return false;
     }
-
-    public void PrintTableStates() //Editor Inspector Button
-    {
-        int i = 0;
-        foreach (TableState state in TableStates)
-        {
-            Debug.Log("Table State Num: " + i);
-            Debug.Log("Player Side:");
-
-
-            string deckOutput = "";
-            state.PlayerSide.Deck.ForEach(card => deckOutput += $"{card.Title}, ");
-
-            string handOutput = "";
-            state.PlayerSide.Hand.ForEach(card => handOutput += $"{card.Title}, ");
-
-            string fieldOutput = "";
-            state.PlayerSide.Field.ForEach(card => fieldOutput += $"{card.Title}, ");
-
-
-            Debug.Log("Deck: " + deckOutput);
-            Debug.Log("Hand: " + handOutput);
-            Debug.Log("Field: " + fieldOutput);
-            Debug.Log("-------------------");
-
-            i++;
-        }
-    }
-}
-
-public struct TableState
-{
-    public TableSide PlayerSide;
-    public TableSide EnemySide;
-
-    public List<Card> DiscardPile;
-}
-
-
-
-public struct TableSide
-{
-    public List<Card> Hand;
-    public List<Card> Field;
-    public List<Card> Deck;
 }

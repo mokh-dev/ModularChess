@@ -24,7 +24,7 @@ public abstract class PieceMoveLogic
     protected bool IsEmptyAtPos(Vector2 endPos)
     {  
         if (IsInBounds(endPos) == false) return false;
-        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
+        if (LogicPiece.usedGameState.BoardGameState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
        
         return true;
     }
@@ -52,7 +52,7 @@ public abstract class PieceMoveLogic
     protected bool IsValidAttack(Vector2 possibleAttackPos)
     {
         if (IsInBounds(possibleAttackPos) == false) return false;
-        if (LogicPiece.UsedBoardState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
+        if (LogicPiece.usedGameState.BoardGameState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
         if (pieceAtAttackPos.PieceTeam == LogicPiece.PieceTeam) return false;
 
         return true;

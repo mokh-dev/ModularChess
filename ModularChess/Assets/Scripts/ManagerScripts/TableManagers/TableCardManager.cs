@@ -27,7 +27,7 @@ public class TableCardManager : MonoBehaviour
         }
     }     
     
-    public void DisplayState(TableState tableState)
+    public void DisplayTableState(TableState tableState)
     {
         DeleteOldCards(_playerHandGroup);
         DeleteOldCards(_playerFieldGroup);

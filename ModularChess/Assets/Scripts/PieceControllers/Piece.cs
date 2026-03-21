@@ -17,12 +17,10 @@ public struct Piece
     public List<Vector2> Movements;
     public List<Vector2> Attacks;
 
-    public Dictionary<int, Vector2> PreviousPiecePositions; 
+    public List<Vector2> PreviousPiecePositions; 
     public Vector2 PiecePosition;
 
-    public int BoardTurnCount;
-
-    public BoardState UsedBoardState => BoardStateManager.Instance.BoardStates[BoardTurnCount];
+    public GameState usedGameState;
 
 
 

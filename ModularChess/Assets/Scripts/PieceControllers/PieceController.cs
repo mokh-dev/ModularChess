@@ -8,7 +8,7 @@ public class PieceController : MonoBehaviour
     private SpriteRenderer sr;
     public PieceTypes PieceObjType;
     public Players PieceObjTeam;
-    public Piece ControlledPiece => BoardStateManager.Instance.CurrentBoardState.BoardPieces[(Vector2)transform.position];
+    public Piece ControlledPiece;
 
 
     public void InitializePieceObj()
@@ -21,8 +21,6 @@ public class PieceController : MonoBehaviour
     {
         Piece piece = new Piece
         {
-            BoardTurnCount = 0,
-
             PieceType = PieceObjType,
             PieceTeam = PieceObjTeam
         };
@@ -30,7 +28,7 @@ public class PieceController : MonoBehaviour
         piece.Logic = (piece.Logic == null) ? BoardDataManager.Instance.GetLogicFromPieceType(PieceObjType) : piece.Logic;   
 
         piece.PiecePosition = (Vector2)transform.position;
-        piece.PreviousPiecePositions = new Dictionary<int, Vector2>();
+        piece.PreviousPiecePositions = new List<Vector2>();
 
         piece.Logic.LogicPiece = piece;
 
