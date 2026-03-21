@@ -26,15 +26,14 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-    //TODO move to GameStateManager along with table initialize
-    // private void StartGame()
-    // {
-    //     BoardState initialBoardState = new BoardState();
-    //     initialBoardState.BoardPieces = new Dictionary<Vector2, Piece>();
-    //     initialBoardState = InitializeBoard(initialBoardState);
 
-    //     UpdateBoardState(initialBoardState);
-    // }
+    public BoardState InitializeBoard()
+    {
+        return new BoardState
+        {
+            BoardPieces = new Dictionary<Vector2, Piece>()
+        };
+    }
 
 
     private void UpdateBoardState(BoardState updatedBoardState)

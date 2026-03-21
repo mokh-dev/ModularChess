@@ -30,6 +30,23 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        GameState initialGameState = new GameState
+        {
+            TableGameState = TableStateManager.Instance.InitializeTable(),
+            BoardGameState = BoardStateManager.Instance.InitializeBoard(),
+
+            TurnCount = 0
+        };
+
+        GameStates.Add(initialGameState);
+    }
 
     //TODO these updates should probably be unity events
     public void UpdateTableGameState(TableState updatedTableState)

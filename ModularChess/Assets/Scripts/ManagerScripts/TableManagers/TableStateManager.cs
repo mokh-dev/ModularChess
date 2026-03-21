@@ -23,28 +23,21 @@ public class TableStateManager : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        InitializeTable();
-    }
-
     private void UpdateTableState(TableState updatedTableState)
     {
         GameStateManager.Instance.UpdateTableGameState(updatedTableState);
         TableCardManager.Instance.DisplayTableState(updatedTableState);
     }
 
-    private void InitializeTable()
+    public TableState InitializeTable()
     {
-        TableState initialTableState = new TableState
+        return new TableState
         {
             PlayerSide = GetInitialTableSide(_startingPlayerDeck),
             EnemySide = GetInitialTableSide(_startingEnemyDeck),
 
             DiscardPile = new List<Card>()
         };
-
-        UpdateTableState(initialTableState);
     }
 
     private TableSide GetInitialTableSide(List<Card> startingDeck)
