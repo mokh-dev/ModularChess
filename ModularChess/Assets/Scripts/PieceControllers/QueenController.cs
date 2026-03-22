@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(PieceController))]
+[RequireComponent(typeof(PieceBuilder))]
 public class QueenController : PieceMoveLogic
 {
     public int MovementRange = 8;
@@ -13,14 +13,14 @@ public class QueenController : PieceMoveLogic
 
 
 
-    public override List<Vector2> FindMovements()
+    public override List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        return FindLaneMovementsInDirections(Directions, LogicPiece.PiecePosition, MovementRange);
+        return FindLaneMovementsInDirections(Directions, piecePosition, logicGameState, MovementRange);
     }
 
-    public override List<Vector2> FindAttacks()
+    public override List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        return FindLaneAttacksInDirections(Directions, LogicPiece.PiecePosition, AttackRange);
+        return FindLaneAttacksInDirections(Directions, piecePosition, logicPiece, logicGameState, AttackRange);
     }
 }
 

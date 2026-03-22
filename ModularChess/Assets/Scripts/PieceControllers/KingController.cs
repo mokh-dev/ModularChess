@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(PieceController))]
+[RequireComponent(typeof(PieceBuilder))]
 public class KingController : PieceMoveLogic
 {
     public int MovementRange = 1;
@@ -9,17 +9,17 @@ public class KingController : PieceMoveLogic
 
 
 
-    public override List<Vector2> FindMovements()
+    public override List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(LogicPiece.PiecePosition, MovementRange);
+        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(piecePosition, MovementRange);
 
-        return ValidateMovements(possibleSquareMovements);
+        return ValidateMovements(possibleSquareMovements, logicGameState);
     }
 
-    public override List<Vector2> FindAttacks()
+    public override List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(LogicPiece.PiecePosition, MovementRange);
+        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(piecePosition, MovementRange);
 
-        return ValidateAttacks(possibleSquareAttacks);
+        return ValidateAttacks(possibleSquareAttacks, logicPiece, logicGameState);
     }
 }

@@ -4572,14 +4572,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce50935b08d39af42a76015489abaaa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardPiecesManager
-  BoardPiecesParent: {fileID: 663323726}
+  _boardPiecesParent: {fileID: 663323726}
+  _basePiecePre: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
+  _movementMarkerPre: {fileID: 2203549235462881066, guid: f1ab6ed0e55186f428af7f418d7db478, type: 3}
+  _attackMarkerPre: {fileID: 2380679966636271944, guid: 5eb6cfc6699e6ff4f92806dd0f3ab481, type: 3}
   Markers: []
-  ResetLastMove:
-    m_PersistentCalls:
-      m_Calls: []
-  _testPieceTeam: 0
-  _testPieceType: 4
   _testPiecePos: {x: 4, y: 4}
+  _testPieceData: {fileID: 0}
 --- !u!1 &881899894
 GameObject:
   m_ObjectHideFlags: 0
@@ -5307,18 +5306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a744b966521a2c4bba0ed03df729f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardDataManager
-  <WhitePieceTeamColor>k__BackingField: {r: 1, g: 1, b: 1, a: 1}
-  <BlackPieceTeamColor>k__BackingField: {r: 0, g: 0, b: 0, a: 1}
-  <PawnSprite>k__BackingField: {fileID: -8532004215358912450, guid: 278c82450ee41b943b6f5dfefdd1a3b1, type: 3}
-  <KnightSprite>k__BackingField: {fileID: 8777228521865428122, guid: 3644cf0639701ef409d8d47e4fc2bff1, type: 3}
-  <BishopSprite>k__BackingField: {fileID: 904179075512932255, guid: f16cd35039f7c87488477c3ea92b49ed, type: 3}
-  <RookSprite>k__BackingField: {fileID: 5600290155524006502, guid: 60b312dca7ab7044a95e2216031eb925, type: 3}
-  <QueenSprite>k__BackingField: {fileID: 3909198007848681256, guid: 1b2d1f042905da14e8ed93fcebabeaae, type: 3}
-  <KingSprite>k__BackingField: {fileID: -6665079566436363118, guid: 0f2e4e4f57799c047afd3f3b38f69a32, type: 3}
   <BoardShape>k__BackingField: {x: 0, y: 0}
-  <BasePiecePre>k__BackingField: {fileID: 7357284106976686597, guid: 05c01bc9b6b2eb149a50b6f183bc101b, type: 3}
-  <PossibleMovementMarkerPre>k__BackingField: {fileID: 2203549235462881066, guid: f1ab6ed0e55186f428af7f418d7db478, type: 3}
-  <PossibleAttackMarkerPre>k__BackingField: {fileID: 2380679966636271944, guid: 5eb6cfc6699e6ff4f92806dd0f3ab481, type: 3}
 --- !u!1 &1072454383
 GameObject:
   m_ObjectHideFlags: 0
@@ -8322,6 +8310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameStateManager
   CurrentPlayerTurn: 0
   _turnIndicatior: {fileID: 697668660}
+  currentTurnCount: 0
 --- !u!4 &1916098479
 Transform:
   m_ObjectHideFlags: 0

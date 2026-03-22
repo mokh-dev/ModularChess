@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(PieceController))]
+[RequireComponent(typeof(PieceBuilder))]
 public class PawnController : PieceMoveLogic
 {
     public int MovementStep = 1;
@@ -13,24 +13,24 @@ public class PawnController : PieceMoveLogic
 
 
 
-    public override List<Vector2> FindMovements()
+    public override List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        int homeRow = (LogicPiece.PieceTeam == Players.White) ? whiteHomeRow : blackHomeRow;
-        int moveDir = (LogicPiece.PieceTeam == Players.White) ? 1 : -1; 
+        int homeRow = (logicPiece.Team == Players.White) ? whiteHomeRow : blackHomeRow;
+        int moveDir = (logicPiece.Team == Players.White) ? 1 : -1; 
         
-        Vector2 currentPos = LogicPiece.PiecePosition;
+        Vector2 currentPos = piecePosition;
         List<Vector2> possibleMoves = new List<Vector2>();
 
 
         Vector2 oneStepPos = new Vector2(currentPos.x, currentPos.y + (MovementStep * moveDir));
-        if (IsValidMovement(oneStepPos)) {possibleMoves.Add(oneStepPos);}
+        if (IsValidMovement(oneStepPos, logicGameState)) {possibleMoves.Add(oneStepPos);}
 
 
         if (currentPos.y == homeRow)
         {
             Vector2 homeRowStepPos = new Vector2(currentPos.x, currentPos.y + (HomeRowStep * moveDir));
 
-            if (IsPathEmpty(LogicPiece.PiecePosition, homeRowStepPos) && IsEmptyAtPos(homeRowStepPos))
+            if (IsPathEmpty(piecePosition, homeRowStepPos, logicGameState) && IsEmptyAtPos(homeRowStepPos, logicGameState))
             {
                 possibleMoves.Add(homeRowStepPos);
             }            
@@ -39,11 +39,11 @@ public class PawnController : PieceMoveLogic
         return possibleMoves;
     }
 
-    public override List<Vector2> FindAttacks()
+    public override List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        int moveDir = (LogicPiece.PieceTeam == Players.White) ? 1 : -1; 
+        int moveDir = (logicPiece.Team == Players.White) ? 1 : -1; 
 
-        Vector2 currentPos = LogicPiece.PiecePosition;
+        Vector2 currentPos = piecePosition;
         List<Vector2> possibleAttackPositions = new List<Vector2>();
 
         Vector2 rightPos = new Vector2(currentPos.x+1, currentPos.y + (AttackStep * moveDir));
@@ -52,7 +52,7 @@ public class PawnController : PieceMoveLogic
         possibleAttackPositions.Add(rightPos);
         possibleAttackPositions.Add(leftPos);
 
-        return ValidateAttacks(possibleAttackPositions);
+        return ValidateAttacks(possibleAttackPositions, logicPiece, logicGameState);
     }
 }
 

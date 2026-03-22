@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(PieceController))]
+[RequireComponent(typeof(PieceBuilder))]
 public class KnightController : PieceMoveLogic
 {
-    public override List<Vector2> FindMovements()
+    public override List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        List<Vector2> possibleMovements = KnightMovePositions(LogicPiece.PiecePosition);
+        List<Vector2> possibleMovements = KnightMovePositions(piecePosition);
 
-        return ValidateMovements(possibleMovements);
+        return ValidateMovements(possibleMovements, logicGameState);
     }
 
-    public override List<Vector2> FindAttacks()
+    public override List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        List<Vector2> possibleAttacks = KnightMovePositions(LogicPiece.PiecePosition);
+        List<Vector2> possibleAttacks = KnightMovePositions(piecePosition);
 
-        return ValidateAttacks(possibleAttacks);
+        return ValidateAttacks(possibleAttacks, logicPiece, logicGameState);
     }
 
 

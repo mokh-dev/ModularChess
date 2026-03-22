@@ -1,46 +1,24 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-public struct Piece
+[CreateAssetMenu(fileName = "Piece", menuName = "Scriptable Objects/Piece")]
+public class Piece : ScriptableObject
 {
+    public PieceLogicType Type;
+    public Players Team;
+    public Sprite Art;
+    public int Health;
+    public int MaxHealth;
 
-    
-    public PieceTypes PieceType;
+    private PieceMoveLogic logic => BoardDataManager.Instance.GetPieceMoveLogic(Type);
 
-    public Players PieceTeam;
-    public PieceMoveLogic Logic;
-    public float PieceBaseValue;
-    public float PieceOverallValue;
-
-    public List<Vector2> Movements;
-    public List<Vector2> Attacks;
-
-    public List<Vector2> PreviousPiecePositions; 
-    public Vector2 PiecePosition;
-
-    public GameState usedGameState;
-
-
-
-    public List<Vector2> GetMovements()
-    {
-        if ((Movements == null) || (Movements.Count == 0))
-        {
-            Logic.LogicPiece = this;
-            Movements = Logic.FindMovements();
-        }
-        return Movements;
+    public List<Vector2> GetMovements(Vector2 piecePosition, GameState gameState)
+    {  
+        return logic.FindMovements(piecePosition, this, gameState);
     }
 
-    public List<Vector2> GetAttacks()
+    public List<Vector2> GetAttacks(Vector2 piecePosition, GameState gameState)
     {
-        if ((Attacks == null) || (Attacks.Count == 0))
-        {
-            Logic.LogicPiece = this;
-            Attacks = Logic.FindAttacks();
-        }
-        return Attacks;
+        return logic.FindAttacks(piecePosition, this, gameState);
     }
 }

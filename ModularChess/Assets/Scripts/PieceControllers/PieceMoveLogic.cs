@@ -5,37 +5,34 @@ using UnityEngine;
 
 public abstract class PieceMoveLogic
 {
-    public abstract List<Vector2> FindMovements();
-    public abstract List<Vector2> FindAttacks();
+    public abstract List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState);
+    public abstract List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState);
 
-    public Piece LogicPiece;
-
-
-    protected bool IsInBounds(Vector2 currentPos)
+    protected bool IsInBounds(Vector2 position)
     {
-        if (currentPos.x > 7) return false;
-        if (currentPos.x < 0) return false;
+        if (position.x > 7) return false;
+        if (position.x < 0) return false;
 
-        if (currentPos.y > 7) return false;
-        if (currentPos.y < 0) return false;
+        if (position.y > 7) return false;
+        if (position.y < 0) return false;
 
         return true;
     }
-    protected bool IsEmptyAtPos(Vector2 endPos)
+    protected bool IsEmptyAtPos(Vector2 endPos, GameState gameState)
     {  
         if (IsInBounds(endPos) == false) return false;
-        if (LogicPiece.usedGameState.BoardGameState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
+        if (gameState.BoardGameState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
        
         return true;
     }
-    protected bool IsPathEmpty(Vector2 currentPos, Vector2 endPos)
+    protected bool IsPathEmpty(Vector2 currentPos, Vector2 endPos, GameState gameState)
     {
         Vector2 direction = DirectionalizeVector2(endPos - currentPos);
         Vector2 iteratedPos = currentPos + direction;
 
         while (iteratedPos != endPos)
         {
-            if (IsValidMovement(iteratedPos) == false) return false;
+            if (IsValidMovement(iteratedPos, gameState) == false) return false;
             iteratedPos += direction;
         }
 
@@ -49,41 +46,48 @@ public abstract class PieceMoveLogic
         );
     }
 
-    protected bool IsValidAttack(Vector2 possibleAttackPos)
+    protected bool IsValidAttack(Vector2 possibleAttackPos, Piece piece, GameState logicGameState)
     {
+        // Debug.Log(GameStateManager.Instance.GameStates.Count);
+        // Debug.Log(LogicGameState);
+        // Debug.Log(LogicGameState.BoardGameState);
+        // Debug.Log(LogicGameState.BoardGameState.testInt);
+        // Debug.Log(GameStateManager.Instance.CurrentGameState.BoardGameState.BoardPieces);
+        // Debug.Log(LogicGameState.BoardGameState.BoardPieces);
+        // Debug.Log(LogicGameState.BoardGameState.BoardPieces.Count);
         if (IsInBounds(possibleAttackPos) == false) return false;
-        if (LogicPiece.usedGameState.BoardGameState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
-        if (pieceAtAttackPos.PieceTeam == LogicPiece.PieceTeam) return false;
+        if (logicGameState.BoardGameState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
+        if (pieceAtAttackPos.Team == piece.Team) return false;
 
         return true;
     }
-    protected List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions)
+    protected List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions, Piece piece, GameState logicGameState)
     {
         List<Vector2> validAttackPositions = new List<Vector2>();
 
         foreach (var possibleAttackPos in possibleAttackPositions)
         {
-            if (IsValidAttack(possibleAttackPos) == false) continue;
+            if (IsValidAttack(possibleAttackPos, piece, logicGameState) == false) continue;
 
             validAttackPositions.Add(possibleAttackPos);
         }
 
         return validAttackPositions;
     }
-    protected bool IsValidMovement(Vector2 possibleMovementPos)
+    protected bool IsValidMovement(Vector2 possibleMovementPos, GameState gameState)
     {
         if (IsInBounds(possibleMovementPos) == false) return false;
-        if (IsEmptyAtPos(possibleMovementPos) == false) return false;
+        if (IsEmptyAtPos(possibleMovementPos, gameState) == false) return false;
         
         return true;
     }
-    protected List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions)
+    protected List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions, GameState gameState)
     {
         List<Vector2> validMovementPositions = new List<Vector2>();
 
         foreach (var possibleMovementPos in possibleMovementPositions)
         {
-            if (IsValidMovement(possibleMovementPos) == false) continue;
+            if (IsValidMovement(possibleMovementPos, gameState) == false) continue;
 
             validMovementPositions.Add(possibleMovementPos);
         }
@@ -134,14 +138,14 @@ public abstract class PieceMoveLogic
         return squarePositions;
     }
 
-    protected List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance)
+    protected List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance, GameState gameState)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
         Vector2 slidingPos = currentPos + direction;
         while (IsInBounds(slidingPos) && slideDistance > 0)
         {
-            if (IsEmptyAtPos(slidingPos) == false) break;
+            if (IsEmptyAtPos(slidingPos, gameState) == false) break;
             possibleMoves.Add(slidingPos);
             slidingPos += direction;
 
@@ -151,12 +155,12 @@ public abstract class PieceMoveLogic
         return possibleMoves;
     }
 
-    protected bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance)
+    protected bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance, Piece piece, GameState gameState)
     {
         Vector2 attackPos;
         Vector2 lastPosition;
 
-        List<Vector2> slidingMovements = FindSlidingMovements(currentPos, direction, slideDistance);
+        List<Vector2> slidingMovements = FindSlidingMovements(currentPos, direction, slideDistance, gameState);
 
         if (slidingMovements.Count == 0)
         {
@@ -170,7 +174,7 @@ public abstract class PieceMoveLogic
 
         attackPos = lastPosition + direction;
         
-        if (IsValidAttack(attackPos) == true)
+        if (IsValidAttack(attackPos, piece, gameState) == true)
         {
             validAttack = attackPos;
             return true;  
@@ -180,25 +184,25 @@ public abstract class PieceMoveLogic
         return false;
     }
 
-    protected List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
+    protected List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, GameState gameState, int slideDistance = 8)
     {
         List<Vector2> laneMovements = new List<Vector2>();
 
         for (int i = 0; i < directions.Count; i++)
         {
-            laneMovements.AddRange(FindSlidingMovements(currentPos, directions[i], slideDistance));
+            laneMovements.AddRange(FindSlidingMovements(currentPos, directions[i], slideDistance, gameState));
         }
 
         return laneMovements;
     }
 
-    protected List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, int slideDistance = 8)
+    protected List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, Piece piece, GameState gameState, int slideDistance = 8)
     {
         List<Vector2> laneAttacks = new List<Vector2>();
 
         for (int i = 0; i < directions.Count; i++)
         {
-            if (TryFindSlidingAttack(out Vector2 possibleAttack, currentPos, directions[i], slideDistance) == false) continue;
+            if (TryFindSlidingAttack(out Vector2 possibleAttack, currentPos, directions[i], slideDistance, piece, gameState) == false) continue;
             if (IsInBounds(possibleAttack) == false) continue;
             laneAttacks.Add(possibleAttack);
         }

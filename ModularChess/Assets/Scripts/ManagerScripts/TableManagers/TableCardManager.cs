@@ -29,11 +29,8 @@ public class TableCardManager : MonoBehaviour
     
     public void DisplayTableState(TableState tableState)
     {
-        DeleteOldCards(_playerHandGroup);
-        DeleteOldCards(_playerFieldGroup);
-        DeleteOldCards(_enemyHandGroup);
-        DeleteOldCards(_enemyFieldGroup);
 
+        ClearTable();
 
         GenerateCards(tableState.PlayerSide.Hand, _playerHandGroup);
         GenerateCards(tableState.PlayerSide.Field, _playerFieldGroup);
@@ -42,7 +39,15 @@ public class TableCardManager : MonoBehaviour
         GenerateCards(tableState.EnemySide.Field, _enemyFieldGroup);
     }
 
-    private void DeleteOldCards(GameObject parentObj)
+    private void ClearTable()
+    {
+        DeleteCardObjectsFromParent(_playerHandGroup);
+        DeleteCardObjectsFromParent(_playerFieldGroup);
+        DeleteCardObjectsFromParent(_enemyHandGroup);
+        DeleteCardObjectsFromParent(_enemyFieldGroup);
+    }
+
+    private void DeleteCardObjectsFromParent(GameObject parentObj)
     {
         foreach (Transform child in parentObj.transform)
         {

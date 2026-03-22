@@ -58,6 +58,7 @@ public class GameStateManager : MonoBehaviour
         };
 
         GameStates.Add(updatedGameState);
+        TableCardManager.Instance.DisplayTableState(updatedGameState.TableGameState);
     }
 
     public void UpdateBoardGameState(BoardState updatedBoardState)
@@ -69,11 +70,14 @@ public class GameStateManager : MonoBehaviour
         };
 
         GameStates.Add(updatedGameState);
+        BoardPiecesManager.Instance.DisplayBoardState(updatedBoardState);
     }
 
-    public void UpdateBothGameStates(GameState updatedGameState)
+    public void UpdateGameState(GameState updatedGameState)
     {
         GameStates.Add(updatedGameState);
+        BoardPiecesManager.Instance.DisplayBoardState(updatedGameState.BoardGameState);
+        TableCardManager.Instance.DisplayTableState(updatedGameState.TableGameState);
     }
 
 
@@ -90,6 +94,7 @@ public class GameStateManager : MonoBehaviour
         foreach (GameState gameState in GameStates)
         {
             Debug.Log("Table State Num: " + i);
+            Debug.Log("special test Num: " + gameState.BoardGameState.testInt);
             Debug.Log("Player Side:");
 
 
@@ -121,7 +126,7 @@ public class GameStateManager : MonoBehaviour
 
             foreach (KeyValuePair<Vector2, Piece> boardPiece in gameState.BoardGameState.BoardPieces)
             {
-                boardPiecesOutput += boardPiece.Value.PieceTeam.ToString()+ " " + boardPiece.Value.PieceType + " at: " + boardPiece.Value.PiecePosition.ToString();
+                boardPiecesOutput += boardPiece.Value.Team.ToString()+ " " + boardPiece.Value.Type + " at: " + boardPiece.Key.ToString();
             }
             Debug.Log("board State Num: " + i);
             Debug.Log("Turn: " + gameState.TurnCount.ToString() + ", ");
@@ -164,7 +169,7 @@ public struct TableSide
 public struct BoardState
 {
     public Dictionary<Vector2, Piece> BoardPieces;
-
+    public int testInt;
     // a list of positions that store the ground info
     // (to tell that at position [3,4] theres a wall or if its non existant)
 }
@@ -176,7 +181,7 @@ public enum Players
     Black,
 }
 
-public enum PieceTypes
+public enum PieceLogicType
 {
     Pawn,
     Knight,

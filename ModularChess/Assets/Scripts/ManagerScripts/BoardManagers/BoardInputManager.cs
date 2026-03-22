@@ -13,7 +13,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         if (IsCorrectTeam(pieceToSelect) == false) return;
 
         _selectedPiece = pieceToSelect;
-        BoardPiecesManager.Instance.SpawnMarkersForPieceObj(pieceToSelect.GetComponent<PieceController>());
+        BoardPiecesManager.Instance.SpawnMarkersForPieceObj(pieceToSelect.GetComponent<PieceBuilder>());
     }
 
     private void UnselectPiece()
@@ -24,7 +24,7 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
     private bool IsCorrectTeam(GameObject piece)
     {
-        if (GameStateManager.Instance.CurrentPlayerTurn == piece.GetComponent<PieceController>().ControlledPiece.PieceTeam) return true;
+        if (GameStateManager.Instance.CurrentPlayerTurn == piece.GetComponent<PieceBuilder>().ControlledPiece.Team) return true;
         return false;
     }
 
@@ -33,9 +33,9 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
     {
         mouseDownPos = new Vector2(Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.x), Mathf.RoundToInt(eventData.pointerPressRaycast.worldPosition.y));
 
-        if (BoardPiecesManager.Instance.BoardPieceObjects.TryGetValue(mouseDownPos, out PieceController pieceController) == true)
+        if (BoardPiecesManager.Instance.BoardPieceObjects.TryGetValue(mouseDownPos, out PieceBuilder pieceBuilder) == true)
         {
-            GameObject pieceObj = pieceController.gameObject;
+            GameObject pieceObj = pieceBuilder.gameObject;
             if (IsCorrectTeam(pieceObj) == true)
             {
                 SelectPiece(pieceObj);

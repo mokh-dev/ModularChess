@@ -9,22 +9,26 @@ public class BoardPiecesManager : MonoBehaviour
     public static BoardPiecesManager Instance { get { return instance; } }
 
 
-    public Dictionary<Vector2, PieceController> BoardPieceObjects = new Dictionary<Vector2, PieceController>();
+    public Dictionary<Vector2, PieceBuilder> BoardPieceObjects {get; private set;} = new Dictionary<Vector2, PieceBuilder>();
 
-    public GameObject BoardPiecesParent;
+    [SerializeField] private GameObject _boardPiecesParent;
+    [SerializeField] private GameObject _basePiecePre;
+    [SerializeField] private GameObject _movementMarkerPre;
+    [SerializeField] private GameObject _attackMarkerPre;
+
+    
 
     public List<GameObject> Markers = new List<GameObject>();
 
-    public UnityEvent ResetLastMove;
+    private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
+    private GameState currentGameState => GameStateManager.Instance.GameStates.Last();
 
     
-    private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
 
 
     [Header("---Test---")]
-    [SerializeField] private Players _testPieceTeam;
-    [SerializeField] private PieceTypes _testPieceType;
     [SerializeField] private Vector2 _testPiecePos;
+    [SerializeField] private Piece _testPieceData;
 
 
 
@@ -38,102 +42,74 @@ public class BoardPiecesManager : MonoBehaviour
             instance = this;
         }
 
-
-        LoadBoardObjectsToDict();
     }
 
-    private void LoadBoardObjectsToDict()
-    {
-        foreach (Transform gameObjectTransform in BoardPiecesParent.transform)
-        {
-            if (gameObjectTransform == BoardPiecesParent.transform) continue; //TODO check if this is needed
-
-            gameObjectTransform.gameObject.GetComponent<PieceController>().InitializePieceObj();
-            BoardPieceObjects.Add((Vector2)gameObjectTransform.position, gameObjectTransform.gameObject.GetComponent<PieceController>());
-        }  
-    }
 
 
     public void DisplayBoardState(BoardState updatedBoardState)
     {
-        
+        ClearBoard();
+
+        foreach (KeyValuePair<Vector2, Piece> pieceInPos in updatedBoardState.BoardPieces)
+        {
+            AddNewPieceObj(pieceInPos.Key, pieceInPos.Value); 
+        }
     }
 
 
 
-
-    public void AddTestPiece()
+    private void ClearBoard()
     {
-        AddNewPieceObj(_testPieceType, _testPiecePos, _testPieceTeam);
+        foreach (KeyValuePair<Vector2, PieceBuilder> pieceInPos in BoardPieceObjects)
+        {
+            Destroy(pieceInPos.Value.gameObject); 
+        }
+
+        BoardPieceObjects = new Dictionary<Vector2, PieceBuilder>();
     }
 
 
-    // FIXME adds to CurrentBoardState which doesnt work
-    public void AddNewPieceObj(PieceTypes type, Vector2 pos, Players team) 
+    public void AddNewPieceObj(Vector2 spawnPosition, Piece piece) 
     {
-        GameObject newPieceObj = Instantiate(BoardDataManager.Instance.BasePiecePre, pos, Quaternion.identity);
-        newPieceObj.transform.SetParent(BoardPiecesParent.transform);
+        GameObject newPieceObj = Instantiate(_basePiecePre, spawnPosition, Quaternion.identity, _boardPiecesParent.transform);
 
-        PieceController newPieceController = newPieceObj.GetComponent<PieceController>();
+        PieceBuilder pieceBuilder = newPieceObj.GetComponent<PieceBuilder>();
 
-        newPieceController.PieceObjType = type;
-        newPieceController.PieceObjTeam = team;
-
-        newPieceController.InitializePieceObj();
-
-        //currentBoardState.BoardPieces.Add(pos, newPieceController.GetInitialPiece());
-    }
-
-    
-    public void MoveBoardPieceObj((Vector2, Vector2) boardMove)
-    {
-        Vector2 initialPosition = boardMove.Item1;
-        Vector2 endPostion = boardMove.Item2;
-
-        PieceController pieceControllerToMove = BoardPieceObjects[initialPosition];
-
-        BoardPieceObjects.Remove(initialPosition);
-
-        pieceControllerToMove.MovePieceObj(endPostion);
-
-        BoardPieceObjects.Add(endPostion, pieceControllerToMove);  
-    }
-
-    public void DestroyPieceObjAtPos(Vector2 pos)
-    {
-        Destroy(BoardPieceObjects[pos].gameObject);
-        BoardPieceObjects.Remove(pos);
+        pieceBuilder.InitializePieceObj(spawnPosition, piece);
+        BoardPieceObjects.Add(spawnPosition, pieceBuilder);
     }
 
 
-    public void SpawnMarkersForPieceObj(PieceController selectedPieceController)
+
+
+    public void SpawnMarkersForPieceObj(PieceBuilder selectedPieceBuilder)
     {
         ClearAllMarkers();
-        SpawnAttackMarkers(selectedPieceController);
-        SpawnMovementMarkers(selectedPieceController);
+        SpawnAttackMarkers(selectedPieceBuilder);
+        SpawnMovementMarkers(selectedPieceBuilder);
     }
 
-    private void SpawnMovementMarkers(PieceController selectedPieceController)
+    private void SpawnMovementMarkers(PieceBuilder selectedPieceBuilder)
     {
-        List<Vector2> possibleMovements = selectedPieceController.ControlledPiece.GetMovements();
+        List<Vector2> possibleMovements = selectedPieceBuilder.ControlledPiece.GetMovements(selectedPieceBuilder.PiecePosition, currentGameState);
         foreach (Vector2 possibleMovementPosition in possibleMovements)
         {
-            if (IsValidCurrentMove(selectedPieceController.ControlledPiece.PiecePosition, possibleMovementPosition) == false) continue;
+            if (IsValidCurrentMove(selectedPieceBuilder.PiecePosition, possibleMovementPosition) == false) continue;
 
-            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleMovementMarkerPre, possibleMovementPosition, Quaternion.identity);
+            GameObject newMarker = Instantiate(_movementMarkerPre, possibleMovementPosition, Quaternion.identity);
             Markers.Add(newMarker);
         }
     }
 
-    private void SpawnAttackMarkers(PieceController selectedPieceController)
+    private void SpawnAttackMarkers(PieceBuilder selectedPieceBuilder)
     {
-        List<Vector2> possibleAttacks = selectedPieceController.ControlledPiece.GetAttacks();
+        List<Vector2> possibleAttacks = selectedPieceBuilder.ControlledPiece.GetAttacks(selectedPieceBuilder.PiecePosition, currentGameState);
 
         foreach (Vector2 possibleAttackPosition in possibleAttacks)
         {
-            if (IsValidCurrentAttack(selectedPieceController.ControlledPiece.PiecePosition, possibleAttackPosition) == false) continue;
+            if (IsValidCurrentAttack(selectedPieceBuilder.PiecePosition, possibleAttackPosition) == false) continue;
 
-            GameObject newMarker = Instantiate(BoardDataManager.Instance.PossibleAttackMarkerPre, possibleAttackPosition, Quaternion.identity);
+            GameObject newMarker = Instantiate(_attackMarkerPre, possibleAttackPosition, Quaternion.identity);
             Markers.Add(newMarker);
         }
     }
@@ -169,7 +145,12 @@ public class BoardPiecesManager : MonoBehaviour
         Markers.Clear();
     }
 
-    public void PrintDictionary()
+    public void AddTestPiece() // Editor Button
+    {
+        AddNewPieceObj(_testPiecePos, _testPieceData);
+    }
+
+    public void PrintDictionary() // Editor Button
     {
         string outputPieces = "";
         string outputControllers = "";
@@ -178,10 +159,10 @@ public class BoardPiecesManager : MonoBehaviour
 
         foreach (KeyValuePair<Vector2, Piece> piece in currentBoardState.BoardPieces)
         {
-            outputPieces+= ", {" + piece.Value.PiecePosition.ToString() + ": " + piece.Value.PieceType.ToString() + "}";
+            outputPieces+= ", {" + piece.Key.ToString() + ": " + piece.Value.Type.ToString() + "}";
         }
 
-        foreach (KeyValuePair<Vector2, PieceController> piece in BoardPieceObjects)
+        foreach (KeyValuePair<Vector2, PieceBuilder> piece in BoardPieceObjects)
         {
             outputControllers+= ", {" + piece.Key.ToString() + ": " + piece.Value.gameObject.name.ToString() + "}";
         }

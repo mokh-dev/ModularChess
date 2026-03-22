@@ -3,7 +3,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class TableStateManager : MonoBehaviour
+public class TableStateManager : MonoBehaviour //TODO check if State managers need to derive from monobehaviour
 {
     private static TableStateManager instance;
     public static TableStateManager Instance { get { return instance; } }
@@ -25,8 +25,7 @@ public class TableStateManager : MonoBehaviour
 
     private void UpdateTableState(TableState updatedTableState)
     {
-        GameStateManager.Instance.UpdateTableGameState(updatedTableState);
-        TableCardManager.Instance.DisplayTableState(updatedTableState);
+        
     }
 
     public TableState InitializeTable()
@@ -80,12 +79,14 @@ public class TableStateManager : MonoBehaviour
             DiscardPile = CurrentTableState.DiscardPile
         };
 
-        UpdateTableState(updatedTableState);
+        GameStateManager.Instance.UpdateTableGameState(updatedTableState);
     }
 
 
     public void PlayCharacterCardToField(Card characterCard)
     {
+        Vector2 tempTestingSpawnPosition = new Vector2(0,0);
+
         if (IsCardInHand(characterCard) == false) return;
 
         List<Card> updatedHand = new List<Card>(CurrentTableState.PlayerSide.Hand);
@@ -93,6 +94,7 @@ public class TableStateManager : MonoBehaviour
         
         List<Card> updatedField = new List<Card>(CurrentTableState.PlayerSide.Field);
         updatedField.Add(characterCard);
+
 
         TableSide updatedPlayerSide = new TableSide
         {
@@ -110,7 +112,14 @@ public class TableStateManager : MonoBehaviour
             DiscardPile = CurrentTableState.DiscardPile
         };
 
-        UpdateTableState(updatedTableState);
+        GameState updatedGameState = new GameState
+        {
+            TableGameState = updatedTableState,
+            BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, characterCard.CharacterPiece)
+        };
+        
+
+       GameStateManager.Instance.UpdateGameState(updatedGameState);
     }
 
     private bool IsCardInHand(Card card)

@@ -12,6 +12,7 @@ public class BoardStateManager : MonoBehaviour
     public static BoardStateManager Instance { get { return instance; } }
 
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
+    private GameState currentGameState => GameStateManager.Instance.GameStates.Last();
 
     
 
@@ -31,7 +32,8 @@ public class BoardStateManager : MonoBehaviour
     {
         return new BoardState
         {
-            BoardPieces = new Dictionary<Vector2, Piece>()
+            BoardPieces = new Dictionary<Vector2, Piece>(),
+            testInt = 5
         };
     }
 
@@ -54,7 +56,17 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
+    public BoardState GetBoardWithAddedPiece(Vector2 piecePosition, Piece pieceToAdd)
+    {
+        //TODO add validity Checks
+        Dictionary<Vector2, Piece> updatedBoardPieces = new Dictionary<Vector2, Piece>(currentBoardState.BoardPieces);
+        updatedBoardPieces.Add(piecePosition, pieceToAdd);
 
+        return new BoardState
+        {
+            BoardPieces = updatedBoardPieces
+        };
+    }
 
     private BoardState GetMovedBoardState(BoardState initialBoardState, (Vector2, Vector2) boardMove)
     {
@@ -73,17 +85,9 @@ public class BoardStateManager : MonoBehaviour
 
             if (boardPiece.Key == initialPosition)
             {
-                updatedBoardPiece.PiecePosition = endPostion;
-                updatedPosition = endPostion;
+                updatedBoardState.BoardPieces.Add(endPostion, updatedBoardPiece);
+                continue;
             }
-            
-            updatedBoardPiece.Attacks = null;
-            updatedBoardPiece.Movements = null;
-
-            updatedBoardPiece.PreviousPiecePositions.Add(boardPiece.Key);
-
-
-            updatedBoardPiece.Logic.LogicPiece = updatedBoardPiece;
 
             updatedBoardState.BoardPieces.Add(updatedPosition, updatedBoardPiece);
         }
@@ -94,7 +98,7 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardAttack((Vector2, Vector2) boardAttack)
     {
         if (currentBoardState.BoardPieces.TryGetValue(boardAttack.Item1, out Piece attackingPiece) == false) return false;
-        if (attackingPiece.GetAttacks().Contains(boardAttack.Item2) == false) return false;
+        if (attackingPiece.GetAttacks(boardAttack.Item1, currentGameState).Contains(boardAttack.Item2) == false) return false;
 
         return true;
     }
@@ -102,7 +106,7 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardMove((Vector2, Vector2) boardMove)
     {
         if (currentBoardState.BoardPieces.TryGetValue(boardMove.Item1, out Piece movingPiece) == false) return false;
-        if (movingPiece.GetMovements().Contains(boardMove.Item2) == false) return false;
+        if (movingPiece.GetMovements(boardMove.Item1, currentGameState).Contains(boardMove.Item2) == false) return false;
 
         return true;
     }
