@@ -15,8 +15,8 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        int homeRow = (logicPiece.Team == Players.White) ? whiteHomeRow : blackHomeRow;
-        int moveDir = (logicPiece.Team == Players.White) ? 1 : -1; 
+        int homeRow = (logicPiece.Team == Sides.Player) ? whiteHomeRow : blackHomeRow;
+        int moveDir = (logicPiece.Team == Sides.Player) ? 1 : -1; 
         
         Vector2 currentPos = piecePosition;
         List<Vector2> possibleMoves = new List<Vector2>();
@@ -41,7 +41,7 @@ public class PawnController : PieceMoveLogic
 
     public override List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
     {
-        int moveDir = (logicPiece.Team == Players.White) ? 1 : -1; 
+        int moveDir = (logicPiece.Team == Sides.Player) ? 1 : -1; 
 
         Vector2 currentPos = piecePosition;
         List<Vector2> possibleAttackPositions = new List<Vector2>();

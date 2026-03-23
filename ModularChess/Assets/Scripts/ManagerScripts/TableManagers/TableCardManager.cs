@@ -32,11 +32,11 @@ public class TableCardManager : MonoBehaviour
 
         ClearTable();
 
-        GenerateCards(tableState.PlayerSide.Hand, _playerHandGroup);
-        GenerateCards(tableState.PlayerSide.Field, _playerFieldGroup);
+        GenerateCards(tableState.PlayerSide.Hand, _playerHandGroup, Sides.Player);
+        GenerateCards(tableState.PlayerSide.Field, _playerFieldGroup, Sides.Player);
 
-        GenerateCards(tableState.EnemySide.Hand, _enemyHandGroup);
-        GenerateCards(tableState.EnemySide.Field, _enemyFieldGroup);
+        GenerateCards(tableState.EnemySide.Hand, _enemyHandGroup, Sides.Enemy);
+        GenerateCards(tableState.EnemySide.Field, _enemyFieldGroup, Sides.Enemy);
     }
 
     private void ClearTable()
@@ -55,13 +55,15 @@ public class TableCardManager : MonoBehaviour
         }
     }
 
-    private void GenerateCards(List<Card> cards, GameObject parentObj)
+    private void GenerateCards(List<Card> cards, GameObject parentObj, Sides cardOwnerSide)
     {
         foreach (Card card in cards)
         {
             GameObject newCard = Instantiate(_emptyCard, parentObj.transform);
             
-            newCard.GetComponent<CardBuilder>().CardData = card;
+            CardBuilder cardBuilder = newCard.GetComponent<CardBuilder>();
+            cardBuilder.CardData = card;
+            cardBuilder.CardOwnerSide = cardOwnerSide;
         }
     }
 

@@ -19,12 +19,12 @@ public class TableInputManager : MonoBehaviour
         }
     }
 
-    public void OnClickCard(Card card)
+    public void OnClickCard(Card card, Sides cardSide)
     {
         switch (card.Type)
         {
             case CardType.Character:
-                TableStateManager.Instance.PlayCharacterCardToField(card);
+                TableStateManager.Instance.PlayCharacterCardToField(card, cardSide);
                 return;
 
             default:
@@ -34,8 +34,9 @@ public class TableInputManager : MonoBehaviour
     }
 
 
-    public void OnClickDeck() // UI Button
+    public void OnClickDeck(int sideInt) 
     {
-        TableStateManager.Instance.DrawCardFromDeck();
+        Sides deckSide = (Sides)sideInt;
+        TableStateManager.Instance.DrawCardFromDeck(deckSide);
     }
 }

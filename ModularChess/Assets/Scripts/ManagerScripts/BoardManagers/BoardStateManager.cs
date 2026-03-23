@@ -33,7 +33,6 @@ public class BoardStateManager : MonoBehaviour
         return new BoardState
         {
             BoardPieces = new Dictionary<Vector2, Piece>(),
-            testInt = 5
         };
     }
 

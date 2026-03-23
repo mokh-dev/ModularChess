@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using System;
 
 public class GameStateManager : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class GameStateManager : MonoBehaviour
     public GameState CurrentGameState => GameStates.Last();
 
 
-    public Players CurrentPlayerTurn;
+    public Sides CurrentPlayerTurn;
 
     [SerializeField] private RawImage _turnIndicatior;
 
@@ -83,8 +84,8 @@ public class GameStateManager : MonoBehaviour
 
     public void EndPlayerTurn() //UI Button
     {
-        CurrentPlayerTurn = (CurrentPlayerTurn == Players.White) ? Players.Black : Players.White;
-        _turnIndicatior.color = (CurrentPlayerTurn == Players.White) ? Color.white : Color.black;
+        CurrentPlayerTurn = (CurrentPlayerTurn == Sides.Player) ? Sides.Player : Sides.Player;
+        _turnIndicatior.color = (CurrentPlayerTurn == Sides.Player) ? Color.white : Color.black;
     }
 
     
@@ -94,27 +95,45 @@ public class GameStateManager : MonoBehaviour
         foreach (GameState gameState in GameStates)
         {
             Debug.Log("Table State Num: " + i);
-            Debug.Log("special test Num: " + gameState.BoardGameState.testInt);
-            Debug.Log("Player Side:");
-
-
-            string deckOutput = "";
-            gameState.TableGameState.PlayerSide.Deck.ForEach(card => deckOutput += $"{card.Title}, ");
-
-            string handOutput = "";
-            gameState.TableGameState.PlayerSide.Hand.ForEach(card => handOutput += $"{card.Title}, ");
-
-            string fieldOutput = "";
-            gameState.TableGameState.PlayerSide.Field.ForEach(card => fieldOutput += $"{card.Title}, ");
-
-
-            Debug.Log("Deck: " + deckOutput);
-            Debug.Log("Hand: " + handOutput);
-            Debug.Log("Field: " + fieldOutput);
-            Debug.Log("-------------------");
-
+            PrintTableState(gameState.TableGameState);
+            
             i++;
         }
+    }
+
+    public void PrintTableState(TableState tableState)
+    {
+        Debug.Log("Player Side:");
+        string deckOutput = "";
+        tableState.PlayerSide.Deck.ForEach(card => deckOutput += $"{card.Title}, ");
+
+        string handOutput = "";
+        tableState.PlayerSide.Hand.ForEach(card => handOutput += $"{card.Title}, ");
+
+        string fieldOutput = "";
+        tableState.PlayerSide.Field.ForEach(card => fieldOutput += $"{card.Title}, ");
+
+
+        Debug.Log("Deck: " + deckOutput);
+        Debug.Log("Hand: " + handOutput);
+        Debug.Log("Field: " + fieldOutput);
+
+        Debug.Log("Enemy Side:");
+
+        deckOutput = "";
+        tableState.EnemySide.Deck.ForEach(card => deckOutput += $"{card.Title}, ");
+
+        handOutput = "";
+        tableState.EnemySide.Hand.ForEach(card => handOutput += $"{card.Title}, ");
+
+        fieldOutput = "";
+        tableState.EnemySide.Field.ForEach(card => fieldOutput += $"{card.Title}, ");
+
+
+        Debug.Log("Deck: " + deckOutput);
+        Debug.Log("Hand: " + handOutput);
+        Debug.Log("Field: " + fieldOutput);
+        Debug.Log("-------------------");
     }
 
     public void PrintBoardStates() //Editor Inspector Button
@@ -169,16 +188,14 @@ public struct TableSide
 public struct BoardState
 {
     public Dictionary<Vector2, Piece> BoardPieces;
-    public int testInt;
     // a list of positions that store the ground info
     // (to tell that at position [3,4] theres a wall or if its non existant)
 }
 
-public enum Players
+public enum Sides
 {
-    //TODO change all occurrences to Player and Enemy
-    White,
-    Black,
+    Player,
+    Enemy,
 }
 
 public enum PieceLogicType

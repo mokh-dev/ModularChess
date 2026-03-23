@@ -9,14 +9,18 @@ public class PieceBuilder : MonoBehaviour
     public Vector2 PiecePosition {get; private set;}
     private SpriteRenderer sr;
 
-
+    [SerializeField] private Sides _pieceSide;
 
     public void InitializePieceObj(Vector2 position, Piece piece)
     {
         ControlledPiece = piece;
         PiecePosition = position;
 
+        _pieceSide = piece.Team;
+
         sr = gameObject.GetComponent<SpriteRenderer>();
         sr.sprite = ControlledPiece.Art;
+
+        sr.color = (piece.Team == Sides.Player) ? Color.white : Color.black;
     }
 }

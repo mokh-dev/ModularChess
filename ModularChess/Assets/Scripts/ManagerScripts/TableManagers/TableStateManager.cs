@@ -52,29 +52,32 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
 
 
 
-    public void DrawCardFromDeck()
+    public void DrawCardFromDeck(Sides deckSide)
     {
-        Card drawnCard = CurrentTableState.PlayerSide.Deck[0];
+        TableSide tableSide = (deckSide == Sides.Player) ? CurrentTableState.PlayerSide : CurrentTableState.EnemySide;
 
-        List<Card> updatedDeck = new List<Card>(CurrentTableState.PlayerSide.Deck);
+        Card drawnCard = tableSide.Deck[0];
+
+        List<Card> updatedDeck = new List<Card>(tableSide.Deck);
         updatedDeck.RemoveAt(0);
         
-        List<Card> updatedHand = new List<Card>(CurrentTableState.PlayerSide.Hand);
+        List<Card> updatedHand = new List<Card>(tableSide.Hand);
         updatedHand.Add(drawnCard);
 
 
-        TableSide updatedPlayerSide = new TableSide
+        TableSide updatedTableSide = new TableSide
         {
             Hand = updatedHand,
-            Field = CurrentTableState.PlayerSide.Field,
+            Field = tableSide.Field,
 
             Deck = updatedDeck
         };
 
+
         TableState updatedTableState = new TableState
         {
-            PlayerSide = updatedPlayerSide,
-            EnemySide = CurrentTableState.EnemySide,
+            PlayerSide = (deckSide == Sides.Player) ? updatedTableSide : CurrentTableState.PlayerSide,
+            EnemySide = (deckSide == Sides.Player) ? CurrentTableState.EnemySide : updatedTableSide,
 
             DiscardPile = CurrentTableState.DiscardPile
         };
@@ -83,31 +86,36 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
     }
 
 
-    public void PlayCharacterCardToField(Card characterCard)
+    public void PlayCharacterCardToField(Card characterCard, Sides cardSide)
     {
-        Vector2 tempTestingSpawnPosition = new Vector2(0,0);
+        if (IsCardInHand(characterCard, cardSide) == false) return;
 
-        if (IsCardInHand(characterCard) == false) return;
+        Vector2 tempTestingSpawnPosition = (cardSide == Sides.Player) ? new Vector2(0,0) : new Vector2(0,7);
+        TableSide initialTableSide = (cardSide == Sides.Player) ? CurrentTableState.PlayerSide : CurrentTableState.EnemySide;
 
-        List<Card> updatedHand = new List<Card>(CurrentTableState.PlayerSide.Hand);
+        Piece characterCardPiece = characterCard.CharacterPiece;
+        characterCardPiece.Team = cardSide;
+
+
+        List<Card> updatedHand = new List<Card>(initialTableSide.Hand);
         updatedHand.Remove(characterCard);
         
-        List<Card> updatedField = new List<Card>(CurrentTableState.PlayerSide.Field);
+        List<Card> updatedField = new List<Card>(initialTableSide.Field);
         updatedField.Add(characterCard);
 
 
-        TableSide updatedPlayerSide = new TableSide
+        TableSide updatedTableSide = new TableSide
         {
             Hand = updatedHand,
             Field = updatedField,
 
-            Deck = CurrentTableState.PlayerSide.Deck
+            Deck = initialTableSide.Deck
         };
 
         TableState updatedTableState = new TableState
         {
-            PlayerSide = updatedPlayerSide,
-            EnemySide = CurrentTableState.EnemySide,
+            PlayerSide = (cardSide == Sides.Player) ? updatedTableSide : CurrentTableState.PlayerSide,
+            EnemySide = (cardSide == Sides.Player) ? CurrentTableState.EnemySide : updatedTableSide,
 
             DiscardPile = CurrentTableState.DiscardPile
         };
@@ -115,16 +123,16 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
         GameState updatedGameState = new GameState
         {
             TableGameState = updatedTableState,
-            BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, characterCard.CharacterPiece)
+            BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, characterCardPiece)
         };
         
-
        GameStateManager.Instance.UpdateGameState(updatedGameState);
     }
 
-    private bool IsCardInHand(Card card)
+    private bool IsCardInHand(Card card, Sides handSide)
     {
-        if (CurrentTableState.PlayerSide.Hand.Contains(card)) return true;
+        List<Card> handToCheck = (handSide == Sides.Player) ? CurrentTableState.PlayerSide.Hand : CurrentTableState.EnemySide.Hand;
+        if (handToCheck.Contains(card)) return true;
         return false;
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Piece : ScriptableObject
 {
     public PieceLogicType Type;
-    public Players Team;
+    public Sides Team;
     public Sprite Art;
     public int Health;
     public int MaxHealth;
