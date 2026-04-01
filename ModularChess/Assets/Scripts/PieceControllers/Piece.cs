@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Piece", menuName = "Scriptable Objects/Piece")]
-public class Piece : ScriptableObject
+public class Piece : ScriptableObject //TODO make all piece data into a struct
 {
     public PieceLogicType Type;
     public Sides Team;
@@ -10,6 +10,7 @@ public class Piece : ScriptableObject
     public int Health;
     public int MaxHealth;
 
+    //TODO change PieceMoveLogic to be a helper class that just returns lists
     private PieceMoveLogic logic => BoardDataManager.Instance.GetPieceMoveLogic(Type);
 
     public List<Vector2> GetMovements(Vector2 piecePosition, GameState gameState)

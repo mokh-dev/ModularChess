@@ -28,7 +28,7 @@ public class BoardPiecesManager : MonoBehaviour
 
     [Header("---Test---")]
     [SerializeField] private Vector2 _testPiecePos;
-    [SerializeField] private Piece _testPieceData;
+    [SerializeField] private Piece _testPieceSO;
 
 
 
@@ -147,7 +147,7 @@ public class BoardPiecesManager : MonoBehaviour
 
     public void AddTestPiece() // Editor Button
     {
-        AddNewPieceObj(_testPiecePos, _testPieceData);
+        AddNewPieceObj(_testPiecePos, _testPieceSO);
     }
 
     public void PrintDictionary() // Editor Button

@@ -11,7 +11,8 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
     [SerializeField] private List<Card> _startingPlayerDeck;
     [SerializeField] private List<Card> _startingEnemyDeck;
 
-    private TableState CurrentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
+    private TableState currentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
+    private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
 
     void Awake()
     {
@@ -54,7 +55,7 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
 
     public void DrawCardFromDeck(Sides deckSide)
     {
-        TableSide tableSide = (deckSide == Sides.Player) ? CurrentTableState.PlayerSide : CurrentTableState.EnemySide;
+        TableSide tableSide = (deckSide == Sides.Player) ? currentTableState.PlayerSide : currentTableState.EnemySide;
 
         Card drawnCard = tableSide.Deck[0];
 
@@ -76,10 +77,10 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
 
         TableState updatedTableState = new TableState
         {
-            PlayerSide = (deckSide == Sides.Player) ? updatedTableSide : CurrentTableState.PlayerSide,
-            EnemySide = (deckSide == Sides.Player) ? CurrentTableState.EnemySide : updatedTableSide,
+            PlayerSide = (deckSide == Sides.Player) ? updatedTableSide : currentTableState.PlayerSide,
+            EnemySide = (deckSide == Sides.Player) ? currentTableState.EnemySide : updatedTableSide,
 
-            DiscardPile = CurrentTableState.DiscardPile
+            DiscardPile = currentTableState.DiscardPile
         };
 
         GameStateManager.Instance.UpdateTableGameState(updatedTableState);
@@ -91,12 +92,12 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
         if (IsCardInHand(characterCard, cardSide) == false) return;
 
         Vector2 tempTestingSpawnPosition = (cardSide == Sides.Player) ? new Vector2(0,0) : new Vector2(0,7);
-        TableSide initialTableSide = (cardSide == Sides.Player) ? CurrentTableState.PlayerSide : CurrentTableState.EnemySide;
+        TableSide initialTableSide = (cardSide == Sides.Player) ? currentTableState.PlayerSide : currentTableState.EnemySide;
 
-        Piece characterCardPiece = characterCard.CharacterPiece;
+        Piece characterCardPiece = Instantiate(characterCard.CharacterPiece);
         characterCardPiece.Team = cardSide;
 
-
+        
         List<Card> updatedHand = new List<Card>(initialTableSide.Hand);
         updatedHand.Remove(characterCard);
         
@@ -114,24 +115,27 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
 
         TableState updatedTableState = new TableState
         {
-            PlayerSide = (cardSide == Sides.Player) ? updatedTableSide : CurrentTableState.PlayerSide,
-            EnemySide = (cardSide == Sides.Player) ? CurrentTableState.EnemySide : updatedTableSide,
+            PlayerSide = (cardSide == Sides.Player) ? updatedTableSide : currentTableState.PlayerSide,
+            EnemySide = (cardSide == Sides.Player) ? currentTableState.EnemySide : updatedTableSide,
 
-            DiscardPile = CurrentTableState.DiscardPile
+            DiscardPile = currentTableState.DiscardPile
         };
+
+
 
         GameState updatedGameState = new GameState
         {
             TableGameState = updatedTableState,
             BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, characterCardPiece)
         };
+
         
        GameStateManager.Instance.UpdateGameState(updatedGameState);
     }
 
     private bool IsCardInHand(Card card, Sides handSide)
     {
-        List<Card> handToCheck = (handSide == Sides.Player) ? CurrentTableState.PlayerSide.Hand : CurrentTableState.EnemySide.Hand;
+        List<Card> handToCheck = (handSide == Sides.Player) ? currentTableState.PlayerSide.Hand : currentTableState.EnemySide.Hand;
         if (handToCheck.Contains(card)) return true;
         return false;
     }

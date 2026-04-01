@@ -40,7 +40,6 @@ public class BoardStateManager : MonoBehaviour
     private void UpdateBoardState(BoardState updatedBoardState)
     {
         GameStateManager.Instance.UpdateBoardGameState(updatedBoardState);
-        BoardPiecesManager.Instance.DisplayBoardState(updatedBoardState);
     }
 
 
@@ -59,6 +58,7 @@ public class BoardStateManager : MonoBehaviour
     {
         //TODO add validity Checks
         Dictionary<Vector2, Piece> updatedBoardPieces = new Dictionary<Vector2, Piece>(currentBoardState.BoardPieces);
+
         updatedBoardPieces.Add(piecePosition, pieceToAdd);
 
         return new BoardState
@@ -80,7 +80,7 @@ public class BoardStateManager : MonoBehaviour
         foreach (KeyValuePair<Vector2, Piece> boardPiece in initialBoardState.BoardPieces)
         {   
             Vector2 updatedPosition = boardPiece.Key;
-            Piece updatedBoardPiece = boardPiece.Value;
+            Piece updatedBoardPiece = Instantiate(boardPiece.Value);
 
             if (boardPiece.Key == initialPosition)
             {

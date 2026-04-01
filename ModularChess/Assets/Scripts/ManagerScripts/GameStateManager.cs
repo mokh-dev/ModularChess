@@ -10,7 +10,7 @@ public class GameStateManager : MonoBehaviour
     private static GameStateManager instance;
     public static GameStateManager Instance { get { return instance; } }
 
-    public List<GameState> GameStates = new List<GameState>();
+    public List<GameState> GameStates {get; private set;} = new List<GameState>();
     public GameState CurrentGameState => GameStates.Last();
 
 
@@ -64,6 +64,7 @@ public class GameStateManager : MonoBehaviour
 
     public void UpdateBoardGameState(BoardState updatedBoardState)
     {
+
         GameState updatedGameState = new GameState
         {
             TableGameState = CurrentGameState.TableGameState,

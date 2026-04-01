@@ -18,3 +18,4 @@ MonoBehaviour:
   Frame: {fileID: 21300000, guid: 5969030b6c5a45844b6da3e566e20679, type: 3}
   Cost: 1
   Description: Spawn Other
+  CharacterPiece: {fileID: 11400000, guid: c778e7f1898af224ca7a707b58175ad8, type: 2}
