@@ -79,14 +79,4 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
 
         return true;
     }
-
-    //TODO add SendTryBoardCapture in input
-    private bool SendTryBoardCapture(Vector2 endPos)
-    {
-        (Vector2, Vector2) boardCapture = ((Vector2)_selectedPiece.transform.position, endPos);
-        
-        //if (BoardStateManager.Instance.TryPlayBoardCapture(boardCapture) == false) return false;
-
-        return true;
-    }
 }

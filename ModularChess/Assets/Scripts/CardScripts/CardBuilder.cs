@@ -30,7 +30,7 @@ public class CardBuilder : MonoBehaviour
             _energyCostText.text = CardData.Cost.ToString();
             _descriptionText.text = CardData.Description;
 
-            _mainArtImage.sprite = CardData.Art;
+            _mainArtImage.sprite = CardData.Image;
             _frameImage.sprite = CardData.Frame;
         }
     }

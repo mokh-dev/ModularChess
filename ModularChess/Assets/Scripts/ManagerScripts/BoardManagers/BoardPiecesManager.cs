@@ -91,7 +91,7 @@ public class BoardPiecesManager : MonoBehaviour
 
     private void SpawnMovementMarkers(PieceBuilder selectedPieceBuilder)
     {
-        List<Vector2> possibleMovements = selectedPieceBuilder.ControlledPiece.GetMovements(selectedPieceBuilder.PiecePosition, currentGameState);
+        List<Vector2> possibleMovements = PieceLogicManager.FindMovements(selectedPieceBuilder.PiecePosition, selectedPieceBuilder.ControlledPiece, currentGameState);
         foreach (Vector2 possibleMovementPosition in possibleMovements)
         {
             if (IsValidCurrentMove(selectedPieceBuilder.PiecePosition, possibleMovementPosition) == false) continue;
@@ -103,7 +103,7 @@ public class BoardPiecesManager : MonoBehaviour
 
     private void SpawnAttackMarkers(PieceBuilder selectedPieceBuilder)
     {
-        List<Vector2> possibleAttacks = selectedPieceBuilder.ControlledPiece.GetAttacks(selectedPieceBuilder.PiecePosition, currentGameState);
+        List<Vector2> possibleAttacks = PieceLogicManager.FindAttacks(selectedPieceBuilder.PiecePosition, selectedPieceBuilder.ControlledPiece, currentGameState);
 
         foreach (Vector2 possibleAttackPosition in possibleAttacks)
         {
@@ -159,7 +159,7 @@ public class BoardPiecesManager : MonoBehaviour
 
         foreach (KeyValuePair<Vector2, Piece> piece in currentBoardState.BoardPieces)
         {
-            outputPieces+= ", {" + piece.Key.ToString() + ": " + piece.Value.Type.ToString() + "}";
+            outputPieces+= ", {" + piece.Key.ToString() + ": " + piece.Value.Title.ToString() + "}";
         }
 
         foreach (KeyValuePair<Vector2, PieceBuilder> piece in BoardPieceObjects)

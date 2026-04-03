@@ -80,7 +80,7 @@ public class BoardStateManager : MonoBehaviour
         foreach (KeyValuePair<Vector2, Piece> boardPiece in initialBoardState.BoardPieces)
         {   
             Vector2 updatedPosition = boardPiece.Key;
-            Piece updatedBoardPiece = Instantiate(boardPiece.Value);
+            Piece updatedBoardPiece = boardPiece.Value;
 
             if (boardPiece.Key == initialPosition)
             {
@@ -97,7 +97,7 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardAttack((Vector2, Vector2) boardAttack)
     {
         if (currentBoardState.BoardPieces.TryGetValue(boardAttack.Item1, out Piece attackingPiece) == false) return false;
-        if (attackingPiece.GetAttacks(boardAttack.Item1, currentGameState).Contains(boardAttack.Item2) == false) return false;
+        if (PieceLogicManager.FindAttacks(boardAttack.Item1, attackingPiece, currentGameState).Contains(boardAttack.Item2) == false) return false;
 
         return true;
     }
@@ -105,7 +105,7 @@ public class BoardStateManager : MonoBehaviour
     public bool IsValidBoardMove((Vector2, Vector2) boardMove)
     {
         if (currentBoardState.BoardPieces.TryGetValue(boardMove.Item1, out Piece movingPiece) == false) return false;
-        if (movingPiece.GetMovements(boardMove.Item1, currentGameState).Contains(boardMove.Item2) == false) return false;
+        if (PieceLogicManager.FindMovements(boardMove.Item1, movingPiece, currentGameState).Contains(boardMove.Item2) == false) return false;
 
         return true;
     }

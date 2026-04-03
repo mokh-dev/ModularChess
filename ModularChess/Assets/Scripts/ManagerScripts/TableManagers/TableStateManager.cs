@@ -8,7 +8,7 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
     private static TableStateManager instance;
     public static TableStateManager Instance { get { return instance; } }
 
-    [SerializeField] private List<Card> _startingPlayerDeck;
+    [SerializeField] private List<CardData> _startingPlayerDeck;
 
     private TableState currentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
@@ -38,8 +38,15 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
         };
     }
 
-    private TableSide GetInitialTableSide(List<Card> startingDeck)
+    private TableSide GetInitialTableSide(List<CardData> startingDeckData)
     {
+        List<Card> startingDeck = new List<Card>();
+
+        foreach (CardData cardData in startingDeckData)
+        {
+            startingDeck.Add(new Card(cardData));
+        }
+
         return new TableSide
         {
             Hand = new List<Card>(),
@@ -113,7 +120,7 @@ public class TableStateManager : MonoBehaviour //TODO check if State managers ne
         GameState updatedGameState = new GameState
         {
             TableGameState = updatedTableState,
-            BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, Instantiate(characterCard.CharacterPiece))
+            BoardGameState = BoardStateManager.Instance.GetBoardWithAddedPiece(tempTestingSpawnPosition, new Piece(characterCard.CharacterPieceData))
         };
 
         

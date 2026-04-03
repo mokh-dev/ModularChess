@@ -1,16 +1,29 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Card", menuName = "Scriptable Objects/Card")]
-public class Card : ScriptableObject
+public class Card
 {
-    public string Title;
-    public CardType Type;
-    public Sprite Art;
-    public Sprite Frame;
-    public int Cost;
-    public string Description;
+    public string Title {get; private set;}
+    public CardType Type {get; private set;}
+    public Sprite Image {get; private set;}
+    public Sprite Frame {get; private set;}
+    public int Cost {get; private set;}
+    public string Description {get; private set;}
 
-    public Piece CharacterPiece;
+    public PieceData CharacterPieceData {get; private set;}
+
+
+    readonly CardData data;
+    public Card(CardData cardData)
+    {
+        data = cardData;
+        Title = cardData.Title;
+        Type = cardData.Type;
+        Image = cardData.Image;
+        Frame = cardData.Frame;
+        Cost = cardData.Cost;
+        Description = cardData.Description;
+        CharacterPieceData = cardData.CharacterPieceData;
+    }
 }
 //TODO make each card type into a separate SO that inherits from Card
 

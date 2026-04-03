@@ -3,12 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public abstract class PieceMoveLogic
+public static class PieceLogicManager
 {
-    public abstract List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState);
-    public abstract List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState);
+    public static List<Vector2> FindMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
+    {
+        switch (logicPiece.MovementType)
+        {
+            case(PieceMovementType.Rectangle):
+                return RectangleMovements(piecePosition, logicPiece, logicGameState);
+            default:
+                Debug.LogError("Movement Type Not Found");
+                return null;
+        }
+    }
+    public static List<Vector2> FindAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
+    {
+        switch (logicPiece.AttackType)
+        {
+            case(PieceAttackType.Rectangle):
+                return RectangleAttacks(piecePosition, logicPiece, logicGameState);
+            default:
+                Debug.LogError("Attack Type Not Found");
+                return null;
+        }
+    }
 
-    protected bool IsInBounds(Vector2 position)
+
+
+    private static List<Vector2> RectangleMovements(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
+    {
+        List<Vector2> possibleSquareMovements = FindSquarePositionsAtRange(piecePosition, logicPiece.MovementRange);
+
+        return ValidateMovements(possibleSquareMovements, logicGameState);
+    }
+
+    private static List<Vector2> RectangleAttacks(Vector2 piecePosition, Piece logicPiece, GameState logicGameState)
+    {
+        List<Vector2> possibleSquareAttacks = FindSquarePositionsAtRange(piecePosition, logicPiece.AttackingRange);
+
+        return ValidateAttacks(possibleSquareAttacks, logicPiece, logicGameState);
+    }
+
+
+
+    private static bool IsInBounds(Vector2 position)
     {
         if (position.x > 7) return false;
         if (position.x < 0) return false;
@@ -18,14 +56,14 @@ public abstract class PieceMoveLogic
 
         return true;
     }
-    protected bool IsEmptyAtPos(Vector2 endPos, GameState gameState)
+    private static bool IsEmptyAtPos(Vector2 endPos, GameState gameState)
     {  
         if (IsInBounds(endPos) == false) return false;
         if (gameState.BoardGameState.BoardPieces.TryGetValue(endPos, out Piece unused) == true) return false;
        
         return true;
     }
-    protected bool IsPathEmpty(Vector2 currentPos, Vector2 endPos, GameState gameState)
+    private static bool IsPathEmpty(Vector2 currentPos, Vector2 endPos, GameState gameState)
     {
         Vector2 direction = DirectionalizeVector2(endPos - currentPos);
         Vector2 iteratedPos = currentPos + direction;
@@ -38,7 +76,7 @@ public abstract class PieceMoveLogic
 
         return true;
     }
-    private Vector2 DirectionalizeVector2(Vector2 vector)
+    private static Vector2 DirectionalizeVector2(Vector2 vector)
     {
         return new Vector2(
             Math.Sign(vector.x),
@@ -46,22 +84,15 @@ public abstract class PieceMoveLogic
         );
     }
 
-    protected bool IsValidAttack(Vector2 possibleAttackPos, Piece piece, GameState logicGameState)
+    private static bool IsValidAttack(Vector2 possibleAttackPos, Piece piece, GameState logicGameState)
     {
-        // Debug.Log(GameStateManager.Instance.GameStates.Count);
-        // Debug.Log(LogicGameState);
-        // Debug.Log(LogicGameState.BoardGameState);
-        // Debug.Log(LogicGameState.BoardGameState.testInt);
-        // Debug.Log(GameStateManager.Instance.CurrentGameState.BoardGameState.BoardPieces);
-        // Debug.Log(LogicGameState.BoardGameState.BoardPieces);
-        // Debug.Log(LogicGameState.BoardGameState.BoardPieces.Count);
         if (IsInBounds(possibleAttackPos) == false) return false;
         if (logicGameState.BoardGameState.BoardPieces.TryGetValue(possibleAttackPos, out Piece pieceAtAttackPos) == false) return false;
         if (pieceAtAttackPos.Team == piece.Team) return false;
 
         return true;
     }
-    protected List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions, Piece piece, GameState logicGameState)
+    private static List<Vector2> ValidateAttacks(List<Vector2> possibleAttackPositions, Piece piece, GameState logicGameState)
     {
         List<Vector2> validAttackPositions = new List<Vector2>();
 
@@ -74,14 +105,14 @@ public abstract class PieceMoveLogic
 
         return validAttackPositions;
     }
-    protected bool IsValidMovement(Vector2 possibleMovementPos, GameState gameState)
+    private static bool IsValidMovement(Vector2 possibleMovementPos, GameState gameState)
     {
         if (IsInBounds(possibleMovementPos) == false) return false;
         if (IsEmptyAtPos(possibleMovementPos, gameState) == false) return false;
         
         return true;
     }
-    protected List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions, GameState gameState)
+    private static List<Vector2> ValidateMovements(List<Vector2> possibleMovementPositions, GameState gameState)
     {
         List<Vector2> validMovementPositions = new List<Vector2>();
 
@@ -100,7 +131,7 @@ public abstract class PieceMoveLogic
 
 
 
-    private int[] FindDiameterValuesOnAxis(int valueCount, int startingValue, int radius)
+    private static int[] FindDiameterValuesOnAxis(int valueCount, int startingValue, int radius)
     {
         int[] values = new int[valueCount];
 
@@ -112,7 +143,7 @@ public abstract class PieceMoveLogic
         return values;
     }
 
-    protected List<Vector2> FindSquarePositionsAtRange(Vector2 currentPos, int distanceToCorner)
+    private static List<Vector2> FindSquarePositionsAtRange(Vector2 currentPos, int distanceToCorner)
     {
         if (distanceToCorner < 1) return new List<Vector2>();
 
@@ -138,7 +169,7 @@ public abstract class PieceMoveLogic
         return squarePositions;
     }
 
-    protected List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance, GameState gameState)
+    private static List<Vector2> FindSlidingMovements(Vector2 currentPos, Vector2 direction, int slideDistance, GameState gameState)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
@@ -155,7 +186,7 @@ public abstract class PieceMoveLogic
         return possibleMoves;
     }
 
-    protected bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance, Piece piece, GameState gameState)
+    private static bool TryFindSlidingAttack(out Vector2 validAttack, Vector2 currentPos, Vector2 direction, int slideDistance, Piece piece, GameState gameState)
     {
         Vector2 attackPos;
         Vector2 lastPosition;
@@ -184,7 +215,7 @@ public abstract class PieceMoveLogic
         return false;
     }
 
-    protected List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, GameState gameState, int slideDistance = 8)
+    private static List<Vector2> FindLaneMovementsInDirections(List<Vector2> directions, Vector2 currentPos, GameState gameState, int slideDistance = 8)
     {
         List<Vector2> laneMovements = new List<Vector2>();
 
@@ -196,7 +227,7 @@ public abstract class PieceMoveLogic
         return laneMovements;
     }
 
-    protected List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, Piece piece, GameState gameState, int slideDistance = 8)
+    private static List<Vector2> FindLaneAttacksInDirections(List<Vector2> directions, Vector2 currentPos, Piece piece, GameState gameState, int slideDistance = 8)
     {
         List<Vector2> laneAttacks = new List<Vector2>();
 

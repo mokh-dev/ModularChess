@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d55f1748cdc2343a2d8e079d7f6672, type: 3}
+  m_Name: MrSnow_PieceData
+  m_EditorClassIdentifier: Assembly-CSharp::PieceData
+  <Title>k__BackingField: Mr Snow
+  <MovementType>k__BackingField: 1
+  <AttackType>k__BackingField: 1
+  <Team>k__BackingField: 0
+  <Art>k__BackingField: {fileID: 904179075512932255, guid: f16cd35039f7c87488477c3ea92b49ed, type: 3}
+  <Health>k__BackingField: 3
+  <Damage>k__BackingField: 1
+  <MovementRange>k__BackingField: 3
+  <AttackingRange>k__BackingField: 2

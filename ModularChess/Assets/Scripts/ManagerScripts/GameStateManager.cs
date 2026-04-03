@@ -129,7 +129,7 @@ public class GameStateManager : MonoBehaviour
 
             foreach (KeyValuePair<Vector2, Piece> boardPiece in gameState.BoardGameState.BoardPieces)
             {
-                boardPiecesOutput += boardPiece.Value.Team.ToString()+ " " + boardPiece.Value.Type + " at: " + boardPiece.Key.ToString();
+                boardPiecesOutput += boardPiece.Value.Team.ToString()+ " " + boardPiece.Value.Title + " at: " + boardPiece.Key.ToString();
             }
             Debug.Log("board State Num: " + i);
             Debug.Log("Turn: " + gameState.TurnCount.ToString() + ", ");
@@ -146,9 +146,10 @@ public struct GameState
     public TableState TableGameState;
     public BoardState BoardGameState;
 
+    public int Energy;
+
     public int TurnCount;
 }
-
 
 
 public struct TableState
@@ -174,18 +175,29 @@ public struct BoardState
     // (to tell that at position [3,4] theres a wall or if its non existant)
 }
 
+public enum GamePhase
+{
+    DungeonPicking,
+    FightingDungeonRoom,
+    IdleDungeonRoom,
+}
+
 public enum Teams
 {
     Player,
     Enemy,
 }
 
-public enum PieceLogicType
+public enum PieceMovementType
 {
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King,
+    Circle,
+    Rectangle,
+    Diamond,
+}
+
+public enum PieceAttackType
+{
+    Circle,
+    Rectangle,
+    Diamond,
 }
