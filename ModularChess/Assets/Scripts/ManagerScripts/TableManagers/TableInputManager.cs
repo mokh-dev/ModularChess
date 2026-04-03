@@ -19,7 +19,7 @@ public class TableInputManager : MonoBehaviour
         }
     }
 
-    public void OnClickCard(Card card, Sides cardSide)
+    public void OnClickCard(Card card, Teams cardSide)
     {
         switch (card.Type)
         {
@@ -34,9 +34,8 @@ public class TableInputManager : MonoBehaviour
     }
 
 
-    public void OnClickDeck(int sideInt) 
+    public void OnClickDeck() 
     {
-        Sides deckSide = (Sides)sideInt;
-        TableStateManager.Instance.DrawCardFromDeck(deckSide);
+        TableStateManager.Instance.DrawCardFromDeck();
     }
 }

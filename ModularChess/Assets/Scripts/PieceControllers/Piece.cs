@@ -5,7 +5,7 @@ using UnityEngine;
 public class Piece : ScriptableObject //TODO make all piece data into a struct
 {
     public PieceLogicType Type;
-    public Sides Team;
+    public Teams Team;
     public Sprite Art;
     public int Health;
     public int MaxHealth;

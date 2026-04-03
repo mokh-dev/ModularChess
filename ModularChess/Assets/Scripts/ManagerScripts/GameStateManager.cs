@@ -14,7 +14,7 @@ public class GameStateManager : MonoBehaviour
     public GameState CurrentGameState => GameStates.Last();
 
 
-    public Sides CurrentPlayerTurn;
+    public Teams CurrentPlayerTurn;
 
     [SerializeField] private RawImage _turnIndicatior;
 
@@ -85,8 +85,8 @@ public class GameStateManager : MonoBehaviour
 
     public void EndPlayerTurn() //UI Button
     {
-        CurrentPlayerTurn = (CurrentPlayerTurn == Sides.Player) ? Sides.Player : Sides.Player;
-        _turnIndicatior.color = (CurrentPlayerTurn == Sides.Player) ? Color.white : Color.black;
+        CurrentPlayerTurn = (CurrentPlayerTurn == Teams.Player) ? Teams.Player : Teams.Player;
+        _turnIndicatior.color = (CurrentPlayerTurn == Teams.Player) ? Color.white : Color.black;
     }
 
     
@@ -118,23 +118,6 @@ public class GameStateManager : MonoBehaviour
         Debug.Log("Deck: " + deckOutput);
         Debug.Log("Hand: " + handOutput);
         Debug.Log("Field: " + fieldOutput);
-
-        Debug.Log("Enemy Side:");
-
-        deckOutput = "";
-        tableState.EnemySide.Deck.ForEach(card => deckOutput += $"{card.Title}, ");
-
-        handOutput = "";
-        tableState.EnemySide.Hand.ForEach(card => handOutput += $"{card.Title}, ");
-
-        fieldOutput = "";
-        tableState.EnemySide.Field.ForEach(card => fieldOutput += $"{card.Title}, ");
-
-
-        Debug.Log("Deck: " + deckOutput);
-        Debug.Log("Hand: " + handOutput);
-        Debug.Log("Field: " + fieldOutput);
-        Debug.Log("-------------------");
     }
 
     public void PrintBoardStates() //Editor Inspector Button
@@ -171,13 +154,11 @@ public struct GameState
 public struct TableState
 {
     public TableSide PlayerSide;
-    public TableSide EnemySide;
-
     public List<Card> DiscardPile;
 }
 
 
-
+//TODO remove TableSide and just make it TableState
 public struct TableSide
 {
     public List<Card> Hand;
@@ -193,7 +174,7 @@ public struct BoardState
     // (to tell that at position [3,4] theres a wall or if its non existant)
 }
 
-public enum Sides
+public enum Teams
 {
     Player,
     Enemy,

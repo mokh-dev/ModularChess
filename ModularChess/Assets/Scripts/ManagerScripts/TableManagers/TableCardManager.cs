@@ -10,8 +10,6 @@ public class TableCardManager : MonoBehaviour
     [SerializeField] private GameObject _emptyCard;
     [SerializeField] private GameObject _playerHandGroup;
     [SerializeField] private GameObject _playerFieldGroup;
-    [SerializeField] private GameObject _enemyHandGroup;
-    [SerializeField] private GameObject _enemyFieldGroup;
     [SerializeField] private Transform _discardPilePosition;
 
 
@@ -32,19 +30,14 @@ public class TableCardManager : MonoBehaviour
 
         ClearTable();
 
-        GenerateCards(tableState.PlayerSide.Hand, _playerHandGroup, Sides.Player);
-        GenerateCards(tableState.PlayerSide.Field, _playerFieldGroup, Sides.Player);
-
-        GenerateCards(tableState.EnemySide.Hand, _enemyHandGroup, Sides.Enemy);
-        GenerateCards(tableState.EnemySide.Field, _enemyFieldGroup, Sides.Enemy);
+        GenerateCards(tableState.PlayerSide.Hand, _playerHandGroup, Teams.Player);
+        GenerateCards(tableState.PlayerSide.Field, _playerFieldGroup, Teams.Player);
     }
 
     private void ClearTable()
     {
         DeleteCardObjectsFromParent(_playerHandGroup);
         DeleteCardObjectsFromParent(_playerFieldGroup);
-        DeleteCardObjectsFromParent(_enemyHandGroup);
-        DeleteCardObjectsFromParent(_enemyFieldGroup);
     }
 
     private void DeleteCardObjectsFromParent(GameObject parentObj)
@@ -55,7 +48,7 @@ public class TableCardManager : MonoBehaviour
         }
     }
 
-    private void GenerateCards(List<Card> cards, GameObject parentObj, Sides cardOwnerSide)
+    private void GenerateCards(List<Card> cards, GameObject parentObj, Teams cardOwnerTeam)
     {
         foreach (Card card in cards)
         {
@@ -63,18 +56,7 @@ public class TableCardManager : MonoBehaviour
             
             CardBuilder cardBuilder = newCard.GetComponent<CardBuilder>();
             cardBuilder.CardData = card;
-            cardBuilder.CardOwnerSide = cardOwnerSide;
+            cardBuilder.CardOwnerTeam = cardOwnerTeam;
         }
-    }
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

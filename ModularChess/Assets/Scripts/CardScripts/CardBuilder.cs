@@ -5,7 +5,7 @@ using TMPro;
 public class CardBuilder : MonoBehaviour
 {
     public Card CardData;
-    public Sides CardOwnerSide;
+    public Teams CardOwnerTeam;
 
     [Header("Child References")]
     [SerializeField] private TextMeshProUGUI _titleText;
@@ -37,7 +37,7 @@ public class CardBuilder : MonoBehaviour
 
     private void ClickedCard()
     {
-        TableInputManager.Instance.OnClickCard(CardData, CardOwnerSide);
+        TableInputManager.Instance.OnClickCard(CardData, CardOwnerTeam);
     }
     
 }
