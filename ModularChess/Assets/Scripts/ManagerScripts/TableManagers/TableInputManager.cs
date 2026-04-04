@@ -2,23 +2,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 
-public class TableInputManager : MonoBehaviour
+public class TableInputManager : Singleton<TableInputManager>
 {
-    private static TableInputManager instance;
-    public static TableInputManager Instance { get { return instance; } }
-
-
-
-    private void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            instance = this;
-        }
-    }
-
     public void OnClickCard(Card card, Teams cardSide)
     {
         switch (card.Type)

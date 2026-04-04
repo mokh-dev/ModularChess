@@ -3,25 +3,13 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class TableStateManager : MonoBehaviour //TODO check if State managers need to derive from monobehaviour
+public class TableStateManager : Singleton<TableStateManager>
 {
-    private static TableStateManager instance;
-    public static TableStateManager Instance { get { return instance; } }
-
     [SerializeField] private List<CardData> _startingPlayerDeck;
 
     private TableState currentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
 
-    void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            instance = this;
-        }
-    }
 
     private void UpdateTableState(TableState updatedTableState)
     {

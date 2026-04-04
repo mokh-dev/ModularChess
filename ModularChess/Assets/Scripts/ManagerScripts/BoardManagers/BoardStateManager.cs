@@ -6,26 +6,10 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 
-public class BoardStateManager : MonoBehaviour
+public class BoardStateManager : Singleton<BoardStateManager>
 {
-    private static BoardStateManager instance;
-    public static BoardStateManager Instance { get { return instance; } }
-
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
     private GameState currentGameState => GameStateManager.Instance.GameStates.Last();
-
-    
-
-    void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            instance = this;
-        }
-    }
-
 
 
     public BoardState InitializeBoard()

@@ -3,12 +3,8 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 using System.Linq;
 
-public class BoardPiecesManager : MonoBehaviour
+public class BoardPiecesManager : Singleton<BoardPiecesManager>
 {
-    private static BoardPiecesManager instance;
-    public static BoardPiecesManager Instance { get { return instance; } }
-
-
     public Dictionary<Vector2, PieceBuilder> BoardPieceObjects {get; private set;} = new Dictionary<Vector2, PieceBuilder>();
 
     [SerializeField] private GameObject _boardPiecesParent;
@@ -30,19 +26,6 @@ public class BoardPiecesManager : MonoBehaviour
     [SerializeField] private Vector2 _testPiecePos;
     [SerializeField] private Piece _testPieceSO;
 
-
-
-
-    private void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            instance = this;
-        }
-
-    }
 
 
 

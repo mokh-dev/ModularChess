@@ -2,29 +2,14 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class TableCardManager : MonoBehaviour
+public class TableCardManager : Singleton<TableCardManager>
 {
-    private static TableCardManager instance;
-    public static TableCardManager Instance { get { return instance; } }
-
     [SerializeField] private GameObject _emptyCard;
     [SerializeField] private GameObject _playerHandGroup;
     [SerializeField] private GameObject _playerFieldGroup;
     [SerializeField] private Transform _discardPilePosition;
 
 
-
-
-    void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-        } else {
-            instance = this;
-        }
-    }     
-    
     public void DisplayTableState(TableState tableState)
     {
 
