@@ -61,22 +61,18 @@ public class BoardInputManager : MonoBehaviour, IPointerDownHandler, IPointerUpH
         UnselectPiece();
     }
 
-    private bool SendTryBoardMove(Vector2 endPos)
+    private void SendTryBoardMove(Vector2 endPos)
     {
         (Vector2, Vector2) boardMove = ((Vector2)_selectedPiece.transform.position, endPos);
         
-        if (BoardStateManager.Instance.TryPlayBoardMove(boardMove) == false) return false;
-
-        return true;
+        BoardStateManager.Instance.TryPlayBoardMove(boardMove);
     }
 
 
-    private bool SendTryBoardAttack(Vector2 endPos)
+    private void SendTryBoardAttack(Vector2 endPos)
     {
         (Vector2, Vector2) boardAttack = ((Vector2)_selectedPiece.transform.position, endPos);
         
-        //if (BoardStateManager.Instance.TryPlayBoardAttack(boardAttack) == false) return false;
-
-        return true;
+        //BoardStateManager.Instance.TryPlayBoardAttack(boardAttack);
     }
 }

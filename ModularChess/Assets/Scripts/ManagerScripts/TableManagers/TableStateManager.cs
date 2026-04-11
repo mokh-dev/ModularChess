@@ -1,6 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TableStateManager : Singleton<TableStateManager>
@@ -9,6 +9,17 @@ public class TableStateManager : Singleton<TableStateManager>
 
     private TableState currentTableState => GameStateManager.Instance.GameStates.Last().TableGameState;
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
+
+
+    private void OnEnable()
+    {
+        ActionSystem.AttachPerformer<DrawCardGA>(DrawCardPerformer);
+    }
+
+    private void OnDisable()
+    {
+        ActionSystem.DetachPerformer<DrawCardGA>();
+    }
 
 
     private void UpdateTableState(TableState updatedTableState)
@@ -46,7 +57,7 @@ public class TableStateManager : Singleton<TableStateManager>
 
 
 
-    public void DrawCardFromDeck()
+    public IEnumerator DrawCardPerformer(DrawCardGA drawCardGA)
     {
         Card drawnCard = currentTableState.PlayerSide.Deck[0];
 
@@ -74,6 +85,7 @@ public class TableStateManager : Singleton<TableStateManager>
         };
 
         GameStateManager.Instance.UpdateTableGameState(updatedTableState);
+        yield return null;
     }
 
 

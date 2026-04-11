@@ -21,6 +21,9 @@ public class TableInputManager : Singleton<TableInputManager>
 
     public void OnClickDeck() 
     {
-        TableStateManager.Instance.DrawCardFromDeck();
+        if (GameStateManager.Instance.CurrentPlayerTurn != Teams.Player) return;
+
+        DrawCardGA drawCardGA = new();
+        ActionSystem.Instance.Perform(drawCardGA);
     }
 }

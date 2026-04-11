@@ -1,15 +1,24 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 
 public class BoardStateManager : Singleton<BoardStateManager>
 {
     private BoardState currentBoardState => GameStateManager.Instance.GameStates.Last().BoardGameState;
     private GameState currentGameState => GameStateManager.Instance.GameStates.Last();
+
+
+    private void OnEnable() 
+    {
+        ActionSystem.AttachPerformer<MovePieceGA>(BoardMovePerformer);
+    }
+
+    private void OnDisable()
+    {
+        ActionSystem.DetachPerformer<MovePieceGA>();
+    }
 
 
     public BoardState InitializeBoard()
@@ -27,29 +36,27 @@ public class BoardStateManager : Singleton<BoardStateManager>
     }
 
 
-    public bool TryPlayBoardMove((Vector2, Vector2) boardMove)
+    public void TryPlayBoardMove((Vector2, Vector2) boardMove)
     {
-        if (IsValidBoardMove(boardMove) == false) return false;
+        if (IsValidBoardMove(boardMove) == false) return;
 
-        BoardState movedBoardState = GetMovedBoardState(currentBoardState, boardMove);
-        UpdateBoardState(movedBoardState);
-        
-        return true;
-    }
-
-
-    public BoardState GetBoardWithAddedPiece(Vector2 piecePosition, Piece pieceToAdd)
-    {
-        //TODO add validity Checks
-        Dictionary<Vector2, Piece> updatedBoardPieces = new Dictionary<Vector2, Piece>(currentBoardState.BoardPieces);
-
-        updatedBoardPieces.Add(piecePosition, pieceToAdd);
-
-        return new BoardState
+        if (ActionSystem.Instance.IsPerforming) return;
+        MovePieceGA movePieceGA = new()
         {
-            BoardPieces = updatedBoardPieces
+            BoardMove = boardMove,
+            MovingPiece = currentBoardState.BoardPieces[boardMove.Item1]
         };
+
+        ActionSystem.Instance.Perform(movePieceGA);
     }
+
+    private IEnumerator BoardMovePerformer(MovePieceGA movePieceGA)
+    {
+        BoardState movedBoardState = GetMovedBoardState(currentBoardState, movePieceGA.BoardMove);
+        UpdateBoardState(movedBoardState);
+        yield return null;
+    }
+
 
     private BoardState GetMovedBoardState(BoardState initialBoardState, (Vector2, Vector2) boardMove)
     {
@@ -76,6 +83,19 @@ public class BoardStateManager : Singleton<BoardStateManager>
         }
 
         return updatedBoardState;
+    }
+
+    public BoardState GetBoardWithAddedPiece(Vector2 piecePosition, Piece pieceToAdd)
+    {
+        //TODO add validity Checks
+        Dictionary<Vector2, Piece> updatedBoardPieces = new Dictionary<Vector2, Piece>(currentBoardState.BoardPieces);
+
+        updatedBoardPieces.Add(piecePosition, pieceToAdd);
+
+        return new BoardState
+        {
+            BoardPieces = updatedBoardPieces
+        };
     }
 
     public bool IsValidBoardAttack((Vector2, Vector2) boardAttack)

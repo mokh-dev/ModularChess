@@ -28,7 +28,7 @@ public class BoardPiecesManager : Singleton<BoardPiecesManager>
 
 
 
-
+    //TODO make a better board display that doesn't delete everything
     public void DisplayBoardState(BoardState updatedBoardState)
     {
         ClearBoard();
