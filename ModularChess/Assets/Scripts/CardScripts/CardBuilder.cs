@@ -4,13 +4,12 @@ using TMPro;
 
 public class CardBuilder : MonoBehaviour
 {
-    public Card CardData;
-    public Teams CardOwnerTeam;
+    public Card CardRef;
 
     [Header("Child References")]
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _typeText;
-    [SerializeField] private TextMeshProUGUI _energyCostText;
+
     [SerializeField] private TextMeshProUGUI _descriptionText;
     [SerializeField] private Image _mainArtImage;
     [SerializeField] private Image _frameImage;
@@ -23,21 +22,20 @@ public class CardBuilder : MonoBehaviour
         cardButton = gameObject.GetComponent<Button>();
         cardButton.onClick.AddListener(ClickedCard);
 
-        if (CardData != null)
+        if (CardRef != null)
         {
-            _titleText.text = CardData.Title;
-            _typeText.text = CardData.Type.ToString();
-            _energyCostText.text = CardData.Cost.ToString();
-            _descriptionText.text = CardData.Description;
+            _titleText.text = CardRef.Title;
+            _typeText.text = CardRef.Type.ToString();
+            _descriptionText.text = CardRef.Description;
 
-            _mainArtImage.sprite = CardData.Image;
-            _frameImage.sprite = CardData.Frame;
+            _mainArtImage.sprite = CardRef.Image;
+            _frameImage.sprite = CardRef.Frame;
         }
     }
 
     private void ClickedCard()
     {
-        TableInputManager.Instance.OnClickCard(CardData, CardOwnerTeam);
+        CardInputManager.Instance.OnClickCard(CardRef);
     }
     
 }

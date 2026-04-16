@@ -6,10 +6,8 @@ public class Card
     public CardType Type {get; private set;}
     public Sprite Image {get; private set;}
     public Sprite Frame {get; private set;}
-    public int Cost {get; private set;}
     public string Description {get; private set;}
-
-    public PieceData CharacterPieceData {get; private set;}
+    public GameObject BlockPre {get; private set;}
 
 
     readonly CardData data;
@@ -20,17 +18,14 @@ public class Card
         Type = cardData.Type;
         Image = cardData.Image;
         Frame = cardData.Frame;
-        Cost = cardData.Cost;
         Description = cardData.Description;
-        CharacterPieceData = cardData.CharacterPieceData;
+        BlockPre = cardData.BlockPre;
     }
 }
 //TODO make each card type into a separate SO that inherits from Card
 
 public enum CardType
 {
-    Character,
+    Block,
     Modifier,
-    Board,
-    Action,
 }

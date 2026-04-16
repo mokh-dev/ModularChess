@@ -28,24 +28,21 @@ public class TestItem : MonoBehaviour
         if (isItemActive == true)
         {
             _itemIndicator.SetActive(true);
-            ActionSystem.SubscribeReaction<MovePieceGA>(MovePieceReaction, ReactionTiming.POST);
+            ActionSystem.SubscribeReaction<PlayCardGA>(MovePieceReaction, ReactionTiming.POST);
             
             UpdateItemText();
         }
         else
         {
-            ActionSystem.UnsubscribeReaction<MovePieceGA>(MovePieceReaction, ReactionTiming.POST);
+            ActionSystem.UnsubscribeReaction<PlayCardGA>(MovePieceReaction, ReactionTiming.POST);
             _itemIndicator.SetActive(false);
 
         }
     }
 
-    private void MovePieceReaction(MovePieceGA movePieceGA)
+    private void MovePieceReaction(PlayCardGA playCardGA)
     {
-        Vector2 initialPos = movePieceGA.BoardMove.Item1;
-        Vector2 endPos = movePieceGA.BoardMove.Item2;
-
-        if (Vector2.Distance(initialPos, endPos) < TestItemComparingValue) return;
+        //if () return;
 
         DrawCardGA drawCardGA = new();
         ActionSystem.Instance.AddReaction(drawCardGA);

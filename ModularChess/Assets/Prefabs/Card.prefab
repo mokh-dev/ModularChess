@@ -687,10 +687,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c1b46ccdc53780488b14c50c7f47108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardDisplay
-  CardData: {fileID: 0}
   _titleText: {fileID: 590312842382735216}
   _typeText: {fileID: 4151174137847632444}
-  _energyCostText: {fileID: 4430706282333673605}
   _descriptionText: {fileID: 7465633898328485632}
   _mainArtImage: {fileID: 1253181376433102790}
   _frameImage: {fileID: 2177115085824322330}
@@ -737,19 +735,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &7017011094552135323
 GameObject:
   m_ObjectHideFlags: 0
